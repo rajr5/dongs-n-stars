@@ -54,7 +54,8 @@
                     <span>{{recent.voteDate | date: 'short'}} - </span>
                     <span>{{recent.fromUser.name}}</span>
                     <span ng-class="recent.class">{{recent.verb}}</span>
-                    <span>{{recent.toUser.name}}</span> a
+                    <span>{{recent.toUser.name}}<span ng-show="recent.verb === 'removed'">'s</span></span>
+                    <span ng-show="recent.verb === 'gave'">a</span>
                     <span ng-class="{'label label-danger': recent.dong, 'label label-success': recent.rockstar}">{{recent.type}}</span>
                     <span ng-show="recent.dong !== 0"> point</span>
                     <span ng-show="recent.rockstar !== 0"> nomination</span>
