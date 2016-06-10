@@ -11,11 +11,13 @@
             <h3 class="panel-title">Give a point</h3>
           </div>
               <div class="panel-body" style="min-height: 300px;">
-                <div ng-if="messages.error" role="alert" class="alert alert-danger">
-                  <div ng-repeat="error in messages.error">{{error.msg}}</div>
-                </div>
-                <div ng-if="messages.success" role="alert" class="alert alert-success">
-                  <div ng-repeat="success in messages.success">{{success.msg}}</div>
+                <div style="min-height: 75px;">
+                  <div ng-if="vm.messages.error && vm.messages.error.length > 0" role="alert" class="alert alert-danger">
+                    <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
+                  </div>
+                  <div ng-if="vm.messages.success && vm.messages.success.length > 0" role="alert" class="alert alert-success">
+                    <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
+                  </div>
                 </div>
                 <form>
                   <div class="form-group" class="col-xs-6">
@@ -48,12 +50,14 @@
               </div>
               <div class="panel-body" style="height: 300px; overflow-y: scroll; overflow-x: none;">
                 <ul class="list-group">
-                  <li ng-repeat="recent in vm.recent | orderBy: '-date' | limitTo: 50" class="list-group-item">
-                    <span>{{recent.date | date: 'short'}} - </span>
-                    <span>{{recent.from}}</span> gave <span>{{recent.to}}</span> a
-                    <span ng-class="{'label label-danger': recent.isDong, 'label label-success': recent.isRockstar}">{{recent.type}}</span>
-                    <span ng-show="recent.type === 'dong'"> point</span>
-                    <span ng-show="recent.type === 'rockstar'"> nomination</span>
+                  <li ng-repeat="recent in vm.recent | orderBy: '-voteDate'" class="list-group-item">
+                    <span>{{recent.voteDate | date: 'short'}} - </span>
+                    <span>{{recent.fromUser.name}}</span>
+                    <span ng-class="recent.class">{{recent.verb}}</span>
+                    <span>{{recent.toUser.name}}</span> a
+                    <span ng-class="{'label label-danger': recent.dong, 'label label-success': recent.rockstar}">{{recent.type}}</span>
+                    <span ng-show="recent.dong !== 0"> point</span>
+                    <span ng-show="recent.rockstar !== 0"> nomination</span>
                   </li>
                 </ul>
               </div>
@@ -89,7 +93,10 @@
                   <td>{{$index + 1}}</td>
                   <td>{{point.name}} - ({{point.email}})</td>
                   <td>{{point.count}}</td>
-                  <td><span ng-click="vm.createUserPoint(point.toUser, 'dong')" class="btn btn-warning btn-xs">Add</span> | Remove</td>
+                  <td>
+                    <span ng-click="vm.createUserPoint(point.toUser, 'dong')" class="btn btn-warning btn-xs">Add</span> |
+                    <span ng-click="vm.removeUserPoint(point.toUser, 'dong')" class="btn btn-info btn-xs">Remove</span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -120,7 +127,10 @@
                   <td>{{$index + 1}}</td>
                   <td>{{point.name}} - ({{point.email}})</td>
                   <td>{{point.count}}</td>
-                  <td><span ng-click="vm.createUserPoint(point.toUser, 'rockstar')" class="btn btn-warning btn-xs">Add</span> | Remove</td>
+                  <td>
+                    <span ng-click="vm.createUserPoint(point.toUser, 'rockstar')" class="btn btn-warning btn-xs">Add</span> |
+                    <span ng-click="vm.removeUserPoint(point.toUser, 'dong')" class="btn btn-info btn-xs">Remove</span>
+                  </td>
                 </tr>
               </tbody>
             </table>

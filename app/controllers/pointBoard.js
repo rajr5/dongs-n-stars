@@ -5,11 +5,10 @@
     .module('MyApp')
     .controller('PointController', PointController);
 
-  PointController.$inject = ['Point', 'Account'];
-  function PointController(Point, Account) {
+  PointController.$inject = ['$timeout', 'Point', 'Account'];
+  function PointController($timeout, Point, Account) {
     var vm = this;
 
-    vm.createdUserPoints = [];
     vm.userPoints = null;
     vm.dongs = [];
     vm.rockstars = [];
@@ -17,6 +16,7 @@
 
     vm.getUsersPoints = getUsersPoints;
     vm.createUserPoint = createUserPoint;
+    vm.removeUserPoint = removeUserPoint;
 
     activate();
 
@@ -24,54 +24,97 @@
 
     function activate() {
       getUsersPoints();
-
+      getRecent();
     }
 
     function getUsersPoints() {
       Point.getUsersPoints()
       .then(function(userPoints) {
-        console.log('userPoints', userPoints);
         vm.userPoints = userPoints.data.userPoints;
         setPoints();
       })
-      .catch(function(err){
-        console.log('error!');
+      .catch(function(response){
+        setMsg(response.data, true);
       });
       Account.getUsers()
       .then(function(users) {
-        console.log('users', users);
         vm.users = users.data;
       })
-      .catch(function(err){
-        console.log('error', err);
+      .catch(function(response){
+        setMsg(response.data, true);
       });
     }
 
+    /**
+     * ADD user point
+     */
     function createUserPoint(toUser, pointType) {
       var data = {
         pointType: pointType,
         toUser: toUser
       };
-      console.log('data', data);
       Point.createPoint(data)
       .then(function(userPoints) {
-        console.log('userPoints', userPoints);
-        vm.createdUserPoints.push(userPoints.data.userPoints);
-        activate();
+        enrichRecent([userPoints.data.userVote]);
+        vm.recent.push(userPoints.data.userVote);
+        getUsersPoints();
+        setMsg(userPoints.data, false);
       })
-      .catch(function(err){
-        console.log('error!');
+      .catch(function(response){
+        setMsg(response.data, true);
+      });
+    }
+
+    /**
+     * REMOVE user point
+     */
+    function removeUserPoint(toUser, pointType) {
+      var data = {
+        pointType: pointType,
+        toUser: toUser
+      };
+      Point.removePoint(toUser, pointType)
+      .then(function(userPoints) {
+        enrichRecent([userPoints.data.userVote]);
+        vm.recent.push(userPoints.data.userVote);
+        getUsersPoints();
+        setMsg(userPoints.data, false);
+      })
+      .catch(function(response){
+        setMsg(response.data, true);
       });
     }
 
     function setPoints() {
       vm.dongs = [];
       vm.rockstars = [];
-      vm.recent = [];
-      console.log('vm.userPoints', vm.userPoints);
       setDongs(vm.userPoints);
       setRockstars(vm.userPoints);
-      setRecent(vm.userPoints);
+    }
+
+    function getRecent() {
+      vm.recent = [];
+      // get recent
+      // update recent obj
+      Point.getUserVotes()
+      .then(function(recent) {
+        enrichRecent(recent.data.userVotes);
+        vm.recent = recent.data.userVotes;
+      })
+      .catch(function(err){
+      });
+    }
+
+    function enrichRecent(userVotes) {
+      userVotes.map((currVal) => {
+        if (currVal.dong === -1 || currVal.rockstars === -1) {
+          currVal.verb = 'removed';
+          currVal.class = 'label label-info';
+        } else {
+          currVal.verb = 'gave';
+          currVal.class = 'label label-warning';
+        }
+      });
     }
 
     function setDongs(userPoints) {
@@ -86,7 +129,6 @@
           });
         }
       });
-      console.log(vm.dongs);
     }
 
     function setRockstars(userPoints) {
@@ -101,33 +143,27 @@
           });
         }
       });
-      console.log(vm.rockstars);
     }
 
-    function setRecent(userPoints) {
-      userPoints.forEach((up) => {
-        up.dongs.forEach((d) => {
-          vm.recent.push({
-            type: 'dong',
-            isDong: true,
-            isRockstar: false,
-            from: d.fromUser.name,
-            to: up.user.name,
-            date: d.createdAt
-          });
-        });
-        up.rockstars.forEach((d) => {
-          vm.recent.push({
-            type: 'rockstar',
-            isDong: false,
-            isRockstar: true,
-            from: d.fromUser.name,
-            to: up.user.name,
-            date: d.createdAt
-          });
-        });
-      });
-      console.log('recent', vm.recent);
+    function setMsg(msg, isError) {
+      if(!Array.isArray(msg)) {
+        msg = [msg];
+      }
+      if (!isError) {
+        vm.messages = {
+          success: msg
+        };
+      } else {
+        vm.messages = {
+          error: msg
+        };
+      }
+      if (vm.toPromise) {
+        $timeout.cancel(vm.toPromise);
+      }
+      vm.toPromise = $timeout(()=>{
+        vm.messages = {};
+      }, 2000, true);
     }
 
   }

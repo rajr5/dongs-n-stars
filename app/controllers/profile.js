@@ -38,9 +38,12 @@
         });
     }
 
-    function changePassword(password, confirmPassword) {
+    function changePassword(password, confirm) {
+      vm.profile.password = password || null;
+      vm.profile.confirm = confirm || null;
       Account.changePassword(vm.profile)
         .then(function(response) {
+          console.log('response', response);
           vm.messages = {
             success: [response.data]
           };
@@ -48,6 +51,7 @@
           delete vm.confirm;
         })
         .catch(function(response) {
+          console.log('response', response);
           vm.messages = {
             error: Array.isArray(response.data) ? response.data : [response.data]
           };

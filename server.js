@@ -19,7 +19,6 @@ var User = require('./models/user');
 
 // Controllers
 var UserController = require('./controllers/user');
-var ContactController = require('./controllers/contact');
 var PointController = require('./controllers/point');
 
 var app = express();
@@ -68,8 +67,10 @@ app.post('/forgot', UserController.forgotPost);
 app.post('/reset/:token', UserController.resetPost);
 app.get('/users', UserController.getUsers);
 app.get('/userPoints', PointController.getUsersPoints);
+app.get('/userVotes', PointController.getUserVotes);
 app.get('/userPoints/:id', PointController.getUserPoints);
 app.post('/point', PointController.createUserPoint);
+app.delete('/point/:toUser/:pointType', PointController.removeUserPoint);
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'app', 'index.html'));

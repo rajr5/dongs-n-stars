@@ -59,7 +59,7 @@ exports.getUsers = function(req, res) {
   .select('_id name email')
   .exec((err, users) => {
     if (err) {
-      sendJson(res, 401, {message: "Could not retreive users", error: err});
+      sendJson(res, 401, {msg: "Could not retreive users", error: err});
     } else {
       sendJson(res, 200, users);
     }
