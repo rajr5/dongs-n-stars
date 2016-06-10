@@ -1,66 +1,60 @@
-angular.module('MyApp')
-  .controller('ProfileCtrl', function($scope, $rootScope, $location, $window, $auth, Account) {
-    $scope.profile = $rootScope.currentUser;
+(function() {
+  'use strict';
 
-    $scope.updateProfile = function() {
-      Account.updateProfile($scope.profile)
+    angular
+      .module('MyApp')
+      .controller('ProfileController', ProfileController);
+
+    ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account',];
+    function ProfileController($rootScope, $location, $window, $auth, Account) {
+      var vm = this;
+      vm.profile = $rootScope.currentUser;
+      vm.updateProfile = updateProfile;
+      vm.changePassword = changePassword;
+      vm.deleteAccount = deleteAccount;
+
+      activate();
+
+      ////////////////
+
+      function activate() {
+        delete vm.profile.password;
+      }
+
+    function updateProfile() {
+      delete vm.profile.password;
+      Account.updateProfile(vm.profile)
         .then(function(response) {
           $rootScope.currentUser = response.data.user;
           $window.localStorage.user = JSON.stringify(response.data.user);
-          $scope.messages = {
+          vm.messages = {
             success: [response.data]
           };
         })
         .catch(function(response) {
-          $scope.messages = {
+          vm.messages = {
             error: Array.isArray(response.data) ? response.data : [response.data]
           };
         });
-    };
+    }
 
-    $scope.changePassword = function() {
-      Account.changePassword($scope.profile)
+    function changePassword(password, confirmPassword) {
+      Account.changePassword(vm.profile)
         .then(function(response) {
-          $scope.messages = {
+          vm.messages = {
             success: [response.data]
           };
+          delete vm.password;
+          delete vm.confirm;
         })
         .catch(function(response) {
-          $scope.messages = {
+          vm.messages = {
             error: Array.isArray(response.data) ? response.data : [response.data]
           };
         });
-    };
+    }
 
-    $scope.link = function(provider) {
-      $auth.link(provider)
-        .then(function(response) {
-          $scope.messages = {
-            success: [response.data]
-          };
-        })
-        .catch(function(response) {
-          $window.scrollTo(0, 0);
-          $scope.messages = {
-            error: [response.data]
-          };
-        });
-    };
-    $scope.unlink = function(provider) {
-      $auth.unlink(provider)
-        .then(function() {
-          $scope.messages = {
-            success: [response.data]
-          };
-        })
-        .catch(function(response) {
-          $scope.messages = {
-            error: [response.data]
-          };
-        });
-    };
-
-    $scope.deleteAccount = function() {
+    function deleteAccount() {
       Account.deleteAccount()
         .then(function() {
           $auth.logout();
@@ -68,9 +62,11 @@ angular.module('MyApp')
           $location.path('/');
         })
         .catch(function(response) {
-          $scope.messages = {
+          vm.messages = {
             error: [response.data]
           };
         });
-    };
-  });
+    }
+
+    }
+  })();
