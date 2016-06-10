@@ -60,7 +60,6 @@ app.use(function(req, res, next) {
   }
 });
 
-app.post('/contact', ContactController.contactPost);
 app.put('/account', UserController.ensureAuthenticated, UserController.accountPut);
 app.delete('/account', UserController.ensureAuthenticated, UserController.accountDelete);
 app.post('/signup', UserController.signupPost);
@@ -71,7 +70,6 @@ app.get('/users', UserController.getUsers);
 app.get('/userPoints', PointController.getUsersPoints);
 app.get('/userPoints/:id', PointController.getUserPoints);
 app.post('/point', PointController.createUserPoint);
-app.get('/unlink/:provider', UserController.ensureAuthenticated, UserController.unlink);
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'app', 'index.html'));

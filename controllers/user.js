@@ -10,7 +10,7 @@ var User = require('../models/user');
 
 function generateToken(user) {
   var payload = {
-    iss: 'my.domain.com',
+    iss: 'dong.atgdevelopment.net',
     sub: user.id,
     iat: moment().unix(),
     exp: moment().add(7, 'days').unix()
@@ -83,7 +83,7 @@ exports.getUsers = function(req, res) {
       return res.status(400).send(errors);
     }
 
-    User.findOne({ email: req.body.email }, function(err, user) {
+    User.findOne({ email: req.body.email }, (err, user) => {
       if (!user) {
         return res.status(401).send({ msg: 'The email address ' + req.body.email + ' is not associated with any account. ' +
         'Double-check your email address and try again.'
@@ -182,32 +182,6 @@ exports.accountDelete = function(req, res, next) {
   });
 };
 
-/**
- * GET /unlink/:provider
- */
-exports.unlink = function(req, res, next) {
-  User.findById(req.user.id, function(err, user) {
-    switch (req.params.provider) {
-      case 'facebook':
-        user.facebook = undefined;
-        break;
-      case 'google':
-        user.google = undefined;
-        break;
-      case 'twitter':
-        user.twitter = undefined;
-        break;
-      case 'vk':
-        user.vk = undefined;
-        break;
-      default:
-        return res.status(400).send({ msg: 'Invalid OAuth Provider' });
-    }
-    user.save(function(err) {
-      res.send({ msg: 'Your account has been unlinked.' });
-    });
-  });
-};
 
 /**
  * POST /forgot
