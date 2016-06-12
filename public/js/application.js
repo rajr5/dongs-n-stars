@@ -12,6 +12,13 @@
 (function() {
   'use strict';
 
+  angular.module('app.auth', [
+
+  ]);
+})();
+(function() {
+  'use strict';
+
   angular.module('app.layout', [
 
   ]);
@@ -20,13 +27,6 @@
   'use strict';
 
   angular.module('app.templates', [
-
-  ]);
-})();
-(function() {
-  'use strict';
-
-  angular.module('app.auth', [
 
   ]);
 })();
@@ -126,22 +126,6 @@ angular.module('app.config', ['ngRoute', 'satellizer'])
     }
   }]);
 
-angular.module('app.layout')
-  .controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function($scope, $location, $window, $auth) {
-    $scope.isActive = function (viewLocation) {
-      return viewLocation === $location.path();
-    };
-
-    $scope.isAuthenticated = function() {
-      return $auth.isAuthenticated();
-    };
-
-    $scope.logout = function() {
-      $auth.logout();
-      delete $window.localStorage.user;
-      $location.path('/');
-    };
-  }]);
 (function() {
 'use strict';
 
@@ -324,6 +308,22 @@ angular.module('app.auth')
     }
   }
 })();
+angular.module('app.layout')
+  .controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function($scope, $location, $window, $auth) {
+    $scope.isActive = function (viewLocation) {
+      return viewLocation === $location.path();
+    };
+
+    $scope.isAuthenticated = function() {
+      return $auth.isAuthenticated();
+    };
+
+    $scope.logout = function() {
+      $auth.logout();
+      delete $window.localStorage.user;
+      $location.path('/');
+    };
+  }]);
 (function() {
 'use strict';
 
