@@ -22,7 +22,7 @@
                   <div class="row" style="max-height:350px;">
                     <ul class="list-group">
                       <a class="list-group-item"
-                      ng-repeat="user in vm.users"
+                      ng-repeat="user in vm.users | orderBy: 'name'"
                       ng-click="vm.selectUser(user)"
                       ng-class="{active: user === vm.user}">
                         {{user.name}} ({{user.email}})
