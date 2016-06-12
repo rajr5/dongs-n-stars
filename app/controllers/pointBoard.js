@@ -13,10 +13,13 @@
     vm.dongs = [];
     vm.rockstars = [];
     vm.recent = [];
+    vm.pointType = 'dong';
 
+    vm.setPointType = setPointType;
     vm.getUsersPoints = getUsersPoints;
     vm.createUserPoint = createUserPoint;
     vm.removeUserPoint = removeUserPoint;
+    vm.selectUser = selectUser;
 
     activate();
 
@@ -45,24 +48,38 @@
       });
     }
 
+    function selectUser(user) {
+      vm.user = user;
+    }
+
+    function setPointType(pointType) {
+      vm.pointType = pointType;
+    }
+
     /**
      * ADD user point
      */
     function createUserPoint(toUser, pointType) {
-      var data = {
-        pointType: pointType,
-        toUser: toUser
-      };
-      Point.createPoint(data)
-      .then(function(userPoints) {
-        enrichRecent([userPoints.data.userVote]);
-        vm.recent.push(userPoints.data.userVote);
-        getUsersPoints();
-        setMsg(userPoints.data, false);
-      })
-      .catch(function(response){
-        setMsg(response.data, true);
-      });
+      if (!toUser) {
+        setMsg({msg: 'You must select a user'}, true);
+      } else {
+        var data = {
+          pointType: pointType,
+          toUser: toUser
+        };
+        Point.createPoint(data)
+        .then(function(userPoints) {
+          enrichRecent([userPoints.data.userVote]);
+          vm.recent.push(userPoints.data.userVote);
+          getUsersPoints();
+          setMsg(userPoints.data, false);
+          vm.user = null;
+        })
+        .catch(function(response){
+          setMsg(response.data, true);
+          vm.user = null;
+        });
+      }
     }
 
     /**
