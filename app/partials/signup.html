@@ -1,22 +1,25 @@
 <div class="login-container">
   <div class="panel">
     <div class="panel-body">
-      <div ng-if="messages.error" role="alert" class="alert alert-danger">
-        <div ng-repeat="error in messages.error">{{error.msg}}</div>
+      <div ng-if="vm.messages.error" role="alert" class="alert alert-danger">
+        <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
       </div>
-      <form ng-submit="signup()">
+      <div ng-if="vm.messages.success" role="alert" class="alert alert-success">
+        <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
+      </div>
+      <form ng-submit="vm.signup()">
         <legend>Create an account</legend>
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" name="name" id="name" placeholder="Name" class="form-control" ng-model="user.name" autofocus>
+          <input type="text" name="name" id="name" placeholder="Name" class="form-control" ng-model="vm.user.name" autofocus>
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" name="email" id="email" placeholder="Email" class="form-control" ng-model="user.email">
+          <input type="email" name="email" id="email" placeholder="Email" class="form-control" ng-model="vm.user.email">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" name="password" id="password" placeholder="Password" class="form-control" ng-model="user.password">
+          <input type="password" name="password" id="password" placeholder="Password" class="form-control" ng-model="vm.user.password">
         </div>
         <div class="form-group">
           <small class="text-muted">By signing up, you agree to the <a href="/">Terms of Service</a>.</small>

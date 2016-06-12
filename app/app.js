@@ -13,7 +13,8 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
       })
       .when('/signup', {
         templateUrl: 'partials/signup.html',
-        controller: 'SignupCtrl',
+        controller: 'SignupController',
+        controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/account', {
@@ -25,6 +26,18 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
       .when('/forgot', {
         templateUrl: 'partials/forgot.html',
         controller: 'ForgotCtrl',
+        resolve: { skipIfAuthenticated: skipIfAuthenticated }
+      })
+      .when('/reset', {
+        templateUrl: 'partials/reset.html',
+        controller: 'ResetController',
+        controllerAs: 'vm',
+        resolve: { skipIfAuthenticated: skipIfAuthenticated }
+      })
+      .when('/activate', {
+        templateUrl: 'partials/activate.html',
+        controller: 'ActivateController',
+        controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/pointBoard', {

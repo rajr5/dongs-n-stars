@@ -15,7 +15,8 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
       })
       .when('/signup', {
         templateUrl: 'partials/signup.html',
-        controller: 'SignupCtrl',
+        controller: 'SignupController',
+        controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/account', {
@@ -27,6 +28,18 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
       .when('/forgot', {
         templateUrl: 'partials/forgot.html',
         controller: 'ForgotCtrl',
+        resolve: { skipIfAuthenticated: skipIfAuthenticated }
+      })
+      .when('/reset', {
+        templateUrl: 'partials/reset.html',
+        controller: 'ResetController',
+        controllerAs: 'vm',
+        resolve: { skipIfAuthenticated: skipIfAuthenticated }
+      })
+      .when('/activate', {
+        templateUrl: 'partials/activate.html',
+        controller: 'ActivateController',
+        controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/pointBoard', {
@@ -60,22 +73,53 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
     }
   }]);
 
-// angular.module('MyApp')
-//   .controller('ContactCtrl', function($scope, Contact) {
-//     $scope.sendContactForm = function() {
-//       Contact.send($scope.contact)
-//         .then(function(response) {
-//           $scope.messages = {
-//             success: [response.data]
-//           };
-//         })
-//         .catch(function(response) {
-//           $scope.messages = {
-//             error: Array.isArray(response.data) ? response.data : [response.data]
-//           };
-//         });
-//     }
-//   });
+(function() {
+'use strict';
+
+  angular
+    .module('MyApp')
+    .controller('ActivateController', ActivateController);
+
+  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
+  function ActivateController($rootScope, $location, $window, $auth, Account) {
+    var vm = this;
+    
+
+    activate();
+
+    ////////////////
+
+    function activate() { 
+      activateAccount();
+    }
+
+    function activateAccount() {
+      // Call out to server
+      // activate account
+      // log account in
+      // look into satellizer api docs
+      var token = $location.search().token;
+      Account.activateAccount(token)
+      .then((response) => {
+        $auth.setToken(response);
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/');
+      })
+      .catch((err) => {
+        if (err.error) {
+          vm.messages = {
+            error: [{ msg: err.error }]
+          };
+        } else if (err.data) {
+          vm.messages = {
+            error: [err.data]
+          };
+        }
+      });
+    }
+  }
+})();
 angular.module('MyApp')
   .controller('ForgotCtrl', ["$scope", "Account", function($scope, Account) {
     $scope.forgotPassword = function() {
@@ -253,7 +297,7 @@ angular.module('MyApp')
 
     function enrichRecent(userVotes) {
       userVotes.map((currVal) => {
-        if (currVal.dong === -1 || currVal.rockstars === -1) {
+        if (currVal.dong === -1 || currVal.rockstar === -1) {
           currVal.verb = 'removed';
           currVal.class = 'label label-info';
         } else {
@@ -390,57 +434,83 @@ angular.module('MyApp')
 
     }
   })();
-angular.module('MyApp')
-  .controller('ResetCtrl', ["$scope", "Account", function($scope, Account) {
-    Account.forgotPassword($scope.user)
+(function() {
+'use strict';
+
+  angular
+    .module('MyApp')
+    .controller('ResetController', ResetController);
+
+  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
+  function ResetController($rootScope, $location, $window, $auth, Account) {
+    var vm = this;
+    
+    vm.resetPassword = resetPassword;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+
+      }
+
+    function resetPassword() {
+      var token = $location.search().token;
+      Account.resetPassword(token, vm.user)
+      .then((response) => {
+        $auth.setToken(response);
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/');
+      })
+      .catch((err) => {
+        vm.messages= {
+          error: Array.isArray(err.data) ? err.data : [err.data]
+        };  
+      });
+    }
+  }
+})();
+
+(function() {
+'use strict';
+
+  angular
+    .module('MyApp')
+    .controller('SignupController', SignupController);
+
+  SignupController.$inject = ['$rootScope', '$location', '$window', '$auth'];
+  function SignupController($rootScope, $location, $window, $auth) {
+    var vm = this;
+    
+    vm.signup = signup;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+
+      }
+
+
+    function signup() {
+      $auth.signup(vm.user)
       .then(function(response) {
-        $scope.messages = {
-          success: [response.data]
+        vm.user = null;
+        vm.messages = {
+          success: Array.isArray(response.data) ? response.data : [response.data]
         };
       })
       .catch(function(response) {
-        $scope.messages = {
-          error: Array.isArray(response.data) ? response.data : [response.data]
-        };
+      vm.messages = {
+        error: Array.isArray(response.data) ? response.data : [response.data]
+      };
       });
-  }]);
-angular.module('MyApp')
-  .controller('SignupCtrl', ["$scope", "$rootScope", "$location", "$window", "$auth", function($scope, $rootScope, $location, $window, $auth) {
-    $scope.signup = function() {
-      $auth.signup($scope.user)
-        .then(function(response) {
-          $auth.setToken(response);
-          $rootScope.currentUser = response.data.user;
-          $window.localStorage.user = JSON.stringify(response.data.user);
-          $location.path('/');
-        })
-        .catch(function(response) {
-          $scope.messages = {
-            error: Array.isArray(response.data) ? response.data : [response.data]
-          };
-        });
-    };
-
-    $scope.authenticate = function(provider) {
-      $auth.authenticate(provider)
-        .then(function(response) {
-          $rootScope.currentUser = response.data.user;
-          $window.localStorage.user = JSON.stringify(response.data.user);
-          $location.path('/');
-        })
-        .catch(function(response) {
-          if (response.error) {
-            $scope.messages = {
-              error: [{ msg: response.error }]
-            };
-          } else if (response.data) {
-            $scope.messages = {
-              error: [response.data]
-            };
-          }
-        });
-    };
-  }]);
+    }
+  }
+})();
 angular.module('MyApp')
   .factory('Account', ["$http", function($http) {
     return {
@@ -456,22 +526,17 @@ angular.module('MyApp')
       forgotPassword: function(data) {
         return $http.post('/forgot', data);
       },
-      resetPassword: function(data) {
-        return $http.post('/reset', data);
+      resetPassword: function(token, data) {
+        return $http.post('/reset/'+token, data);
+      },
+      activateAccount: function(token, data) {
+        return $http.post('/activate/'+token, data);
       },
       getUsers: function(data) {
         return $http.get('/users', data);
       }
     };
   }]);
-// angular.module('MyApp')
-//   .factory('Contact', function($http) {
-//     return {
-//       send: function(data) {
-//         return $http.post('/contact', data);
-//       }
-//     };
-//   });
 angular.module('MyApp')
   .factory('Point', ["$http", function($http) {
     return {

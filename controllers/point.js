@@ -77,6 +77,7 @@ exports.getUserVotes = function(req, res) {
 exports.createUserPoint = function(req, res) {
   req.assert('pointType', 'Point type is not valid.  Valid types are dong and rockstar').notEmpty().isIn(['dong', 'rockstar']);
   req.assert('toUser', 'User is not valid').notEmpty();
+  req.assert('toUser', 'You cannot modify your own points').notEqual(req.user._id);
 
   var errors = req.validationErrors();
 
@@ -142,6 +143,7 @@ exports.createUserPoint = function(req, res) {
 exports.removeUserPoint = function(req, res) {
   req.assert('pointType', 'Point type is not valid.  Valid types are dong and rockstar').notEmpty().isIn(['dong', 'rockstar']);
   req.assert('toUser', 'User is not valid').notEmpty();
+  req.assert('toUser', 'User is not valid').notEqual(req.user._id);
 
   var errors = req.validationErrors();
 
@@ -169,9 +171,14 @@ exports.removeUserPoint = function(req, res) {
       if (!userPoint) {
         return sendJson(res, 400, {msg: 'You cannot remove a point from a user without any points of this type', error: err});
       }
-      var pluralPointType = pointType + 's';
+      
       // Push point (either rockstar or dong) to userPoint
-      userPoint[pluralPointType][0].remove();
+      try {
+        var pluralPointType = pointType + 's';
+        userPoint[pluralPointType][0].remove();
+      } catch (e) {
+        return sendJson(res, 400, {msg: 'Could not remove ' + pointType, error: err});
+      }
 
       userPoint.save((err)=>{
         if (err) {

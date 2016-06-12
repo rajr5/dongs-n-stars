@@ -107,7 +107,7 @@
 
     function enrichRecent(userVotes) {
       userVotes.map((currVal) => {
-        if (currVal.dong === -1 || currVal.rockstars === -1) {
+        if (currVal.dong === -1 || currVal.rockstar === -1) {
           currVal.verb = 'removed';
           currVal.class = 'label label-info';
         } else {

@@ -34,9 +34,16 @@ app.use(compression());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(expressValidator());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(expressValidator({
+ customValidators: {
+    notEqual: function(value1, value2) {
+        return value1 !== value2;
+    }
+ }
+}));
 
 app.use(function(req, res, next) {
   req.isAuthenticated = function() {
@@ -62,7 +69,7 @@ app.use(function(req, res, next) {
 app.put('/account', UserController.ensureAuthenticated, UserController.accountPut);
 app.delete('/account', UserController.ensureAuthenticated, UserController.accountDelete);
 app.post('/signup', UserController.signupPost);
-app.post('/activate/:token', UserController.signupPost);
+app.post('/activate/:token', UserController.activateAccount);
 app.post('/login', UserController.loginPost);
 app.post('/forgot', UserController.forgotPost);
 app.post('/reset/:token', UserController.resetPost);

@@ -13,8 +13,11 @@ angular.module('MyApp')
       forgotPassword: function(data) {
         return $http.post('/forgot', data);
       },
-      resetPassword: function(data) {
-        return $http.post('/reset', data);
+      resetPassword: function(token, data) {
+        return $http.post('/reset/'+token, data);
+      },
+      activateAccount: function(token, data) {
+        return $http.post('/activate/'+token, data);
       },
       getUsers: function(data) {
         return $http.get('/users', data);

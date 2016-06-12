@@ -53,7 +53,10 @@ exports.ensureAuthenticated = function(req, res, next) {
    */
 exports.getUsers = function(req, res) {
   User
-  .find({}) // TODO -> dont return active=false (return active undefined or null)
+  .find(
+    {$and: [
+      {$or: [{active: true},{active: undefined}]},
+      {_id: {$ne: req.user._id}}]})
   .select('_id name email')
   .exec((err, users) => {
     if (err) {
@@ -153,11 +156,11 @@ exports.signupPost = function(req, res, next) {
           subject: '✔ Activate your account on Dongs N Stars',
           text: 'You are receiving this email because you registered for an account on Dongs N Stars.\n\n' +
           'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-          'http://' + req.headers.host + '/activate/' + user.activationToken + '\n\n'
+          'http://' + req.headers.host + '/activate?token=' + user.activationToken + '\n\n'
         };
 
         mailerService.sendMail(email.to, email.subject, email.text, null, email.from)
-        .then((user) => {
+        .then((mailerResponse) => {
           sendJson(res, 200, { msg: 'An email has been sent to ' + user.email + ' to confirm the email address with this account. The link will be active for 7 days' });
         })
         .catch((err) => {
@@ -177,7 +180,7 @@ exports.signupPost = function(req, res, next) {
  * GET /activate/:token
  */
 exports.activateAccount = function(req, res, next) {
-  // finnd account with token
+  // find account with token
   User.findOne({ activationToken: req.params.token })
   .where('activationTokenExpires').gt(Date.now())
   .exec((err, user) => {
@@ -284,7 +287,7 @@ exports.forgotPost = function(req, res, next) {
             subject: '✔ Reset your password on Dongs N Stars',
             text: 'You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
             'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            'http://' + req.headers.host + '/reset/' + token + '\n\n' +
+            'http://' + req.headers.host + '/reset?token=' + token + '\n\n' +
             'If you did not request this, please ignore this email and your password will remain unchanged.\n'
           };
           mailerService.sendMail(email.to, email.subject, email.text, null, email.from)
@@ -324,7 +327,6 @@ exports.resetPost = function(req, res, next) {
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
       user.save((err) => {
-        req.logIn(user, (err) => {
           var email= {
             from: 'support@atgdevelopment.net',
             to: user.email,
@@ -334,13 +336,13 @@ exports.resetPost = function(req, res, next) {
           };
           mailerService.sendMail(email.to, email.subject, email.text, null, email.from)
           .then((info) => {
-            sendJson(res, 200, { msg: 'Your password has been changed successfully.' });
+            sendJson(res, 200, { msg: 'Your password has been changed successfully.', token: generateToken(user), user: user.toJSON() });
           })
           .catch((err) => {
             console.log('email confirmation for password reset failed.');
-            sendJson(res, 200, { msg: 'Your password has been changed successfully.' });
+            res.send({ token: generateToken(user), user: user.toJSON() });
+            sendJson(res, 200, { msg: 'Your password has been changed successfully.', token: generateToken(user), user: user.toJSON()});
           });
-        });
       });
     });
 };
