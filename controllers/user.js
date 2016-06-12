@@ -1,11 +1,9 @@
-var _ = require('lodash');
-var async = require('async');
 var crypto = require('crypto');
-var nodemailer = require('nodemailer');
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var request = require('request');
 var qs = require('querystring');
+var mailerService = require('../services/mailer');
 var User = require('../models/user');
 
 function generateToken(user) {
@@ -45,7 +43,7 @@ exports.ensureAuthenticated = function(req, res, next) {
   if (req.isAuthenticated()) {
     next();
   } else {
-    res.status(401).send({ msg: 'Unauthorized' });
+    sendJson(res, 401, {msg: 'Unauthorized'});
   }
 };
 
@@ -55,7 +53,7 @@ exports.ensureAuthenticated = function(req, res, next) {
    */
 exports.getUsers = function(req, res) {
   User
-  .find({})
+  .find({}) // TODO -> dont return active=false (return active undefined or null)
   .select('_id name email')
   .exec((err, users) => {
     if (err) {
@@ -83,13 +81,16 @@ exports.getUsers = function(req, res) {
       return res.status(400).send(errors);
     }
 
+    // TODO - make sure account is active
     User.findOne({ email: req.body.email }, (err, user) => {
       if (!user) {
-        return res.status(401).send({ msg: 'The email address ' + req.body.email + ' is not associated with any account. ' +
+        return sendJson(res, 401, { msg: 'The email address ' + req.body.email + ' is not associated with any account. ' +
         'Double-check your email address and try again.'
         });
+      } else if(user.active === false) {
+        return sendJson(res, 401, {msg: 'You must confirm your email address prior to logging in.  Please refer to the email sent when you registered.'});
       }
-      user.comparePassword(req.body.password, function(err, isMatch) {
+      user.comparePassword(req.body.password, (err, isMatch) => {
         if (!isMatch) {
           return res.status(401).send({ msg: 'Invalid email or password' });
         }
@@ -114,21 +115,87 @@ exports.signupPost = function(req, res, next) {
     return res.status(400).send(errors);
   }
 
-
-  User.findOne({ email: req.body.email }, function(err, user) {
+  User.findOne({ email: req.body.email }, (err, user) => {
     if (user) {
-    return res.status(400).send({ msg: 'The email address you have entered is already associated with another account.' });
+      return sendJson(res, 400, { msg: 'The email address you have entered is already associated with another account.' });
     }
-    user = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password
-    });
-    user.save(function(err) {
-    res.send({ token: generateToken(user), user: user });
+
+    // Generate Activation Token
+    new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        var token = buf.toString('hex');
+        if (err) {
+          return reject(err);
+        }
+        resolve(token);
+      });
+    })
+    .then((token) => {
+      // Create user
+      user = new User({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+        active: false,
+        activationToken: token,
+        activationTokenExpires: Date.now() + 604800000 // expire in 7 days
+      });
+      // Save user
+      user.save((err) => {
+        // TODO -> instead of giving token, make user confirm email account
+        // TODO -> on login, check to ensure account is active
+        // If token expired, give option to re-send token
+        // TODO -> send email here for account confirmation
+        // Send activation token
+        var email= {
+          to: user.email,
+          from: 'support@atgdevelopment.net',
+          subject: '✔ Activate your account on Dongs N Stars',
+          text: 'You are receiving this email because you registered for an account on Dongs N Stars.\n\n' +
+          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+          'http://' + req.headers.host + '/activate/' + user.activationToken + '\n\n'
+        };
+
+        mailerService.sendMail(email.to, email.subject, email.text, null, email.from)
+        .then((user) => {
+          sendJson(res, 200, { msg: 'An email has been sent to ' + user.email + ' to confirm the email address with this account. The link will be active for 7 days' });
+        })
+        .catch((err) => {
+          // email send failed
+          sendJson(res, 401, {msg: 'Could not send activation email.  Accoutn has been created, please contact and administrator', error: err});
+        });
+      });
+    })
+    .catch((err) => {
+      sendJson(res, 401, {msg: 'Failed generating activation token. Accoutn not saved, please contact an administrator', error: err});
     });
   });
 };
+
+
+/**
+ * GET /activate/:token
+ */
+exports.activateAccount = function(req, res, next) {
+  // finnd account with token
+  User.findOne({ activationToken: req.params.token })
+  .where('activationTokenExpires').gt(Date.now())
+  .exec((err, user) => {
+    if (err) {
+      return sendJson(res, 401, {msg: 'Token is not valid'});
+    }
+    user.active = true;
+    user.activationToken = undefined;
+    user.activationTokenExpires = undefined;
+    user.save((err) => {
+      if (err) {
+        sendJson(res, 401, { msg: 'Error activating account', error: err });
+      } else {
+        sendJson(res, 200, { token: generateToken(user), user: user });
+      }
+    });
+  });
+}
 
 
 /**
@@ -151,23 +218,20 @@ exports.accountPut = function(req, res, next) {
     return res.status(400).send(errors);
   }
 
-  User.findById(req.user.id, function(err, user) {
+  User.findById(req.user.id, (err, user) => {
     if ('password' in req.body) {
       user.password = req.body.password;
     } else {
       user.email = req.body.email;
       user.name = req.body.name;
-      user.gender = req.body.gender;
-      user.location = req.body.location;
-      user.website = req.body.website;
     }
-    user.save(function(err) {
+    user.save((err) => {
       if ('password' in req.body) {
         res.send({ msg: 'Your password has been changed.' });
       } else if (err && err.code === 11000) {
-        res.status(409).send({ msg: 'The email address you have entered is already associated with another account.' });
+        sendJson(res, 409, { msg: 'The email address you have entered is already associated with another account.' });
       } else {
-        res.send({ user: user, msg: 'Your profile information has been updated.' });
+        sendJson(res, 200, { user: user, msg: 'Your profile information has been updated.' })
       }
     });
   });
@@ -177,8 +241,8 @@ exports.accountPut = function(req, res, next) {
  * DELETE /account
  */
 exports.accountDelete = function(req, res, next) {
-  User.remove({ _id: req.user.id }, function(err) {
-    res.send({ msg: 'Your account has been permanently deleted.' });
+  User.remove({ _id: req.user.id }, (err) => {
+    sendJson(res, 204, { msg: 'Your account has been permanently deleted.' });
   });
 };
 
@@ -197,48 +261,45 @@ exports.forgotPost = function(req, res, next) {
     return res.status(400).send(errors);
   }
 
-  async.waterfall([
-    function(done) {
-      crypto.randomBytes(16, function(err, buf) {
+    new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) =>{
         var token = buf.toString('hex');
-        done(err, token);
+        if (err) {
+          return reject(err);
+        }
+        resolve(token);
       });
-    },
-    function(token, done) {
-      User.findOne({ email: req.body.email }, function(err, user) {
+    })
+    .then((token) => {
+      User.findOne({ email: req.body.email }, (err, user) =>{
         if (!user) {
-          return res.status(400).send({ msg: 'The email address ' + req.body.email + ' is not associated with any account.' });
+          return sendJson(res, 400, { msg: 'The email address ' + req.body.email + ' is not associated with any account.' });
         }
         user.passwordResetToken = token;
         user.passwordResetExpires = Date.now() + 3600000; // expire in 1 hour
-        user.save(function(err) {
-          done(err, token, user);
+        user.save((err) => {
+          var email= {
+            to: user.email,
+            from: 'support@yourdomain.com',
+            subject: '✔ Reset your password on Dongs N Stars',
+            text: 'You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
+            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+            'http://' + req.headers.host + '/reset/' + token + '\n\n' +
+            'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+          };
+          mailerService.sendMail(email.to, email.subject, email.text, null, email.from)
+          .then((info) => {
+            sendJson(res, 200, { msg: 'An email has been sent to ' + user.email + ' with further instructions.' });
+          })
+          .catch((err) => {
+            sendJson(res, 400, {msg: 'Reset token was created, but could not be emailed.'});
+          });
         });
       });
-    },
-    function(token, user, done) {
-      var transporter = nodemailer.createTransport({
-        service: 'Mailgun',
-        auth: {
-          user: process.env.MAILGUN_USERNAME,
-          pass: process.env.MAILGUN_PASSWORD
-        }
-      });
-      var mailOptions = {
-        to: user.email,
-        from: 'support@yourdomain.com',
-        subject: '✔ Reset your password on Mega Boilerplate',
-        text: 'You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
-        'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-        'http://' + req.headers.host + '/reset/' + token + '\n\n' +
-        'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-      };
-      transporter.sendMail(mailOptions, function(err) {
-        res.send({ msg: 'An email has been sent to ' + user.email + ' with further instructions.' });
-        done(err);
-      });
-    }
-  ]);
+    })
+    .catch((err) => {
+      sendJson(res, 400, {msg: 'There was an error processing the password reset request.'});
+    });
 };
 
 /**
@@ -251,45 +312,35 @@ exports.resetPost = function(req, res, next) {
   var errors = req.validationErrors();
 
   if (errors) {
-      return res.status(400).send(errors);
+      return sendJson(res, 400, errors);
   }
-
-  async.waterfall([
-    function(done) {
-      User.findOne({ passwordResetToken: req.params.token })
-        .where('passwordResetExpires').gt(Date.now())
-        .exec(function(err, user) {
-          if (!user) {
-            return res.status(400).send({ msg: 'Password reset token is invalid or has expired.' });
-          }
-          user.password = req.body.password;
-          user.passwordResetToken = undefined;
-          user.passwordResetExpires = undefined;
-          user.save(function(err) {
-            req.logIn(user, function(err) {
-              done(err, user);
-            });
+  User.findOne({ passwordResetToken: req.params.token })
+    .where('passwordResetExpires').gt(Date.now())
+    .exec((err, user) => {
+      if (!user) {
+        return sendJson(res, 400, { msg: 'Password reset token is invalid or has expired.' });
+      }
+      user.password = req.body.password;
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      user.save((err) => {
+        req.logIn(user, (err) => {
+          var email= {
+            from: 'support@atgdevelopment.net',
+            to: user.email,
+            subject: 'Your Dongs N Stars password has been changed',
+            text: 'Hello,\n\n' +
+            'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
+          };
+          mailerService.sendMail(email.to, email.subject, email.text, null, email.from)
+          .then((info) => {
+            sendJson(res, 200, { msg: 'Your password has been changed successfully.' });
+          })
+          .catch((err) => {
+            console.log('email confirmation for password reset failed.');
+            sendJson(res, 200, { msg: 'Your password has been changed successfully.' });
           });
         });
-    },
-    function(user, done) {
-      var transporter = nodemailer.createTransport({
-        service: 'Mailgun',
-        auth: {
-          user: process.env.MAILGUN_USERNAME,
-          pass: process.env.MAILGUN_PASSWORD
-        }
       });
-      var mailOptions = {
-        from: 'support@yourdomain.com',
-        to: user.email,
-        subject: 'Your Mega Boilerplate password has been changed',
-        text: 'Hello,\n\n' +
-        'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
-      };
-      transporter.sendMail(mailOptions, function(err) {
-      res.send({ msg: 'Your password has been changed successfully.' });
-      });
-    }
-  ]);
+    });
 };

@@ -16,6 +16,9 @@ var userSchema = new mongoose.Schema({
   passwordResetToken: String,
   passwordResetExpires: Date,
   location: String,
+  active: Boolean,
+  activationToken: String,
+  activationTokenExpires: Date,
 }, schemaOptions);
 
 userSchema.pre('save', function(next) {
