@@ -1,4 +1,57 @@
-angular.module('MyApp', ['ngRoute', 'satellizer'])
+(function() {
+  'use strict';
+
+  angular.module('app', [
+    /** Application Modules */
+    'app.config','app.auth', 'app.layout', 'app.services', 'app.user', 'app.point-board','app.templates'
+
+    /** 3rd Party Modules */
+
+  ]);
+})();
+(function() {
+  'use strict';
+
+  angular.module('app.layout', [
+
+  ]);
+})();
+(function() {
+  'use strict';
+
+  angular.module('app.templates', [
+
+  ]);
+})();
+(function() {
+  'use strict';
+
+  angular.module('app.auth', [
+
+  ]);
+})();
+(function() {
+  'use strict';
+
+  angular.module('app.point-board', [
+
+  ]);
+})();
+(function() {
+  'use strict';
+
+  angular.module('app.services', [
+
+  ]);
+})();
+(function() {
+  'use strict';
+
+  angular.module('app.user', [
+
+  ]);
+})();
+angular.module('app.config', ['ngRoute', 'satellizer'])
   .config(["$routeProvider", "$locationProvider", "$authProvider", function($routeProvider, $locationProvider, $authProvider) {
     skipIfAuthenticated.$inject = ["$location", "$auth"];
     loginRequired.$inject = ["$location", "$auth"];
@@ -6,50 +59,50 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
 
     $routeProvider
       .when('/', {
-        templateUrl: 'partials/home.html'
+        templateUrl: 'layout/home.html'
       })
       .when('/login', {
-        templateUrl: 'partials/login.html',
+        templateUrl: 'auth/login.html',
         controller: 'LoginCtrl',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/signup', {
-        templateUrl: 'partials/signup.html',
+        templateUrl: 'auth/signup.html',
         controller: 'SignupController',
         controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
-      .when('/account', {
-        templateUrl: 'partials/profile.html',
-        controller: 'ProfileController',
-        controllerAs: 'vm',
-        resolve: { loginRequired: loginRequired }
-      })
       .when('/forgot', {
-        templateUrl: 'partials/forgot.html',
+        templateUrl: 'auth/forgot.html',
         controller: 'ForgotCtrl',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/reset', {
-        templateUrl: 'partials/reset.html',
+        templateUrl: 'auth/reset.html',
         controller: 'ResetController',
         controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/activate', {
-        templateUrl: 'partials/activate.html',
+        templateUrl: 'auth/activate.html',
         controller: 'ActivateController',
         controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
+      .when('/account', {
+        templateUrl: 'user/profile.html',
+        controller: 'ProfileController',
+        controllerAs: 'vm',
+        resolve: { loginRequired: loginRequired }
+      })
       .when('/pointBoard', {
-        templateUrl: 'partials/pointBoard.html',
+        templateUrl: 'point-board/point-board.html',
         controller: 'PointController',
         controllerAs: 'vm',
         resolve: { loginRequired: loginRequired }
       })
       .otherwise({
-        templateUrl: 'partials/404.html'
+        templateUrl: 'layout/404.html'
       });
 
     $authProvider.loginUrl = '/login';
@@ -73,23 +126,38 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
     }
   }]);
 
+angular.module('app.layout')
+  .controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function($scope, $location, $window, $auth) {
+    $scope.isActive = function (viewLocation) {
+      return viewLocation === $location.path();
+    };
+
+    $scope.isAuthenticated = function() {
+      return $auth.isAuthenticated();
+    };
+
+    $scope.logout = function() {
+      $auth.logout();
+      delete $window.localStorage.user;
+      $location.path('/');
+    };
+  }]);
 (function() {
 'use strict';
 
   angular
-    .module('MyApp')
+    .module('app.auth')
     .controller('ActivateController', ActivateController);
 
   ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
   function ActivateController($rootScope, $location, $window, $auth, Account) {
     var vm = this;
-    
 
     activate();
 
     ////////////////
 
-    function activate() { 
+    function activate() {
       activateAccount();
     }
 
@@ -120,7 +188,14 @@ angular.module('MyApp', ['ngRoute', 'satellizer'])
     }
   }
 })();
-angular.module('MyApp')
+(function() {
+  'use strict';
+
+  angular.module('app.auth', [
+
+  ]);
+})();
+angular.module('app.auth')
   .controller('ForgotCtrl', ["$scope", "Account", function($scope, Account) {
     $scope.forgotPassword = function() {
       Account.forgotPassword($scope.user)
@@ -136,23 +211,7 @@ angular.module('MyApp')
         });
     }
   }]);
-angular.module('MyApp')
-  .controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function($scope, $location, $window, $auth) {
-    $scope.isActive = function (viewLocation) {
-      return viewLocation === $location.path();
-    };
-    
-    $scope.isAuthenticated = function() {
-      return $auth.isAuthenticated();
-    };
-    
-    $scope.logout = function() {
-      $auth.logout();
-      delete $window.localStorage.user;
-      $location.path('/');
-    };
-  }]);
-angular.module('MyApp')
+angular.module('app.auth')
   .controller('LoginCtrl', ["$scope", "$rootScope", "$location", "$window", "$auth", function($scope, $rootScope, $location, $window, $auth) {
     $scope.login = function() {
       $auth.login($scope.user)
@@ -192,7 +251,84 @@ angular.module('MyApp')
 'use strict';
 
   angular
-    .module('MyApp')
+    .module('app.auth')
+    .controller('ResetController', ResetController);
+
+  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
+  function ResetController($rootScope, $location, $window, $auth, Account) {
+    var vm = this;
+
+    vm.resetPassword = resetPassword;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+
+      }
+
+    function resetPassword() {
+      var token = $location.search().token;
+      Account.resetPassword(token, vm.user)
+      .then((response) => {
+        $auth.setToken(response);
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/');
+      })
+      .catch((err) => {
+        vm.messages= {
+          error: Array.isArray(err.data) ? err.data : [err.data]
+        };
+      });
+    }
+  }
+})();
+
+(function() {
+'use strict';
+
+  angular
+    .module('app.auth')
+    .controller('SignupController', SignupController);
+
+  SignupController.$inject = ['$rootScope', '$location', '$window', '$auth'];
+  function SignupController($rootScope, $location, $window, $auth) {
+    var vm = this;
+
+    vm.signup = signup;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+
+      }
+
+
+    function signup() {
+      $auth.signup(vm.user)
+      .then(function(response) {
+        vm.user = null;
+        vm.messages = {
+          success: Array.isArray(response.data) ? response.data : [response.data]
+        };
+      })
+      .catch(function(response) {
+      vm.messages = {
+        error: Array.isArray(response.data) ? response.data : [response.data]
+      };
+      });
+    }
+  }
+})();
+(function() {
+'use strict';
+
+  angular
+    .module('app.point-board')
     .controller('PointController', PointController);
 
   PointController.$inject = ['$timeout', 'Point', 'Account'];
@@ -375,11 +511,66 @@ angular.module('MyApp')
 
   }
 })();
+angular.module('app.services')
+  .factory('Account', ["$http", function($http) {
+    return {
+      updateProfile: function(data) {
+        return $http.put('/account', data);
+      },
+      changePassword: function(data) {
+        return $http.put('/account', data);
+      },
+      deleteAccount: function() {
+        return $http.delete('/account');
+      },
+      forgotPassword: function(data) {
+        return $http.post('/forgot', data);
+      },
+      resetPassword: function(token, data) {
+        return $http.post('/reset/'+token, data);
+      },
+      activateAccount: function(token, data) {
+        return $http.post('/activate/'+token, data);
+      },
+      getUsers: function(data) {
+        return $http.get('/users', data);
+      }
+    };
+  }]);
+angular.module('app.services')
+  .factory('Point', ["$http", function($http) {
+    return {
+      getUsersPoints: function(query) {
+        var options = {};
+        options.query = query;
+        return $http.get('/userPoints', options);
+      },
+      getUserPoints: function(id, query) {
+        var options = {};
+        options.query = query;
+        return $http.get('/userPoints/'+id, options);
+      },
+      getUserVotes: function(id, query) {
+        var options = {};
+        options.query = query;
+        return $http.get('/userVotes', options);
+      },
+      createPoint: function(data) {
+        return $http.post('/point', data);
+      },
+      removePoint: function(toUser, pointType, query) {
+        var options = {};
+        options.query = query || {};
+        return $http.delete('/point/'+toUser+'/'+pointType, options);
+      }
+    };
+  }]);
+
 (function() {
   'use strict';
 
     angular
-      .module('MyApp')
+      .module('app.user')
       .controller('ProfileController', ProfileController);
 
     ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account',];
@@ -451,134 +642,3 @@ angular.module('MyApp')
 
     }
   })();
-(function() {
-'use strict';
-
-  angular
-    .module('MyApp')
-    .controller('ResetController', ResetController);
-
-  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
-  function ResetController($rootScope, $location, $window, $auth, Account) {
-    var vm = this;
-    
-    vm.resetPassword = resetPassword;
-
-    activate();
-
-    ////////////////
-
-    function activate() {
-
-      }
-
-    function resetPassword() {
-      var token = $location.search().token;
-      Account.resetPassword(token, vm.user)
-      .then((response) => {
-        $auth.setToken(response);
-        $rootScope.currentUser = response.data.user;
-        $window.localStorage.user = JSON.stringify(response.data.user);
-        $location.path('/');
-      })
-      .catch((err) => {
-        vm.messages= {
-          error: Array.isArray(err.data) ? err.data : [err.data]
-        };  
-      });
-    }
-  }
-})();
-
-(function() {
-'use strict';
-
-  angular
-    .module('MyApp')
-    .controller('SignupController', SignupController);
-
-  SignupController.$inject = ['$rootScope', '$location', '$window', '$auth'];
-  function SignupController($rootScope, $location, $window, $auth) {
-    var vm = this;
-    
-    vm.signup = signup;
-
-    activate();
-
-    ////////////////
-
-    function activate() {
-
-      }
-
-
-    function signup() {
-      $auth.signup(vm.user)
-      .then(function(response) {
-        vm.user = null;
-        vm.messages = {
-          success: Array.isArray(response.data) ? response.data : [response.data]
-        };
-      })
-      .catch(function(response) {
-      vm.messages = {
-        error: Array.isArray(response.data) ? response.data : [response.data]
-      };
-      });
-    }
-  }
-})();
-angular.module('MyApp')
-  .factory('Account', ["$http", function($http) {
-    return {
-      updateProfile: function(data) {
-        return $http.put('/account', data);
-      },
-      changePassword: function(data) {
-        return $http.put('/account', data);
-      },
-      deleteAccount: function() {
-        return $http.delete('/account');
-      },
-      forgotPassword: function(data) {
-        return $http.post('/forgot', data);
-      },
-      resetPassword: function(token, data) {
-        return $http.post('/reset/'+token, data);
-      },
-      activateAccount: function(token, data) {
-        return $http.post('/activate/'+token, data);
-      },
-      getUsers: function(data) {
-        return $http.get('/users', data);
-      }
-    };
-  }]);
-angular.module('MyApp')
-  .factory('Point', ["$http", function($http) {
-    return {
-      getUsersPoints: function(query) {
-        var options = {};
-        options.query = query;
-        return $http.get('/userPoints', options);
-      },
-      getUserPoints: function(id, query) {
-        var options = {};
-        options.query = query;
-        return $http.get('/userPoints/'+id, options);
-      },
-      getUserVotes: function(id, query) {
-        var options = {};
-        options.query = query;
-        return $http.get('/userVotes', options);
-      },
-      createPoint: function(data) {
-        return $http.post('/point', data);
-      },
-      removePoint: function(toUser, pointType, query) {
-        var options = {};
-        options.query = query || {};
-        return $http.delete('/point/'+toUser+'/'+pointType, options);
-      }
-    };
-  }]);

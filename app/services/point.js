@@ -1,4 +1,4 @@
-angular.module('MyApp')
+angular.module('app.services')
   .factory('Point', function($http) {
     return {
       getUsersPoints: function(query) {

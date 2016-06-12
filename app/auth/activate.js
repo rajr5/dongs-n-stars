@@ -2,19 +2,18 @@
 'use strict';
 
   angular
-    .module('MyApp')
+    .module('app.auth')
     .controller('ActivateController', ActivateController);
 
   ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
   function ActivateController($rootScope, $location, $window, $auth, Account) {
     var vm = this;
-    
 
     activate();
 
     ////////////////
 
-    function activate() { 
+    function activate() {
       activateAccount();
     }
 

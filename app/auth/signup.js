@@ -2,13 +2,13 @@
 'use strict';
 
   angular
-    .module('MyApp')
+    .module('app.auth')
     .controller('SignupController', SignupController);
 
   SignupController.$inject = ['$rootScope', '$location', '$window', '$auth'];
   function SignupController($rootScope, $location, $window, $auth) {
     var vm = this;
-    
+
     vm.signup = signup;
 
     activate();

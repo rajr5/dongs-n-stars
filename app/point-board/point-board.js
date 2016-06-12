@@ -2,7 +2,7 @@
 'use strict';
 
   angular
-    .module('MyApp')
+    .module('app.point-board')
     .controller('PointController', PointController);
 
   PointController.$inject = ['$timeout', 'Point', 'Account'];

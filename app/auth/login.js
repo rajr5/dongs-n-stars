@@ -1,4 +1,4 @@
-angular.module('MyApp')
+angular.module('app.auth')
   .controller('LoginCtrl', function($scope, $rootScope, $location, $window, $auth) {
     $scope.login = function() {
       $auth.login($scope.user)

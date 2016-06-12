@@ -1,4 +1,4 @@
-angular.module('MyApp')
+angular.module('app.services')
   .factory('Account', function($http) {
     return {
       updateProfile: function(data) {

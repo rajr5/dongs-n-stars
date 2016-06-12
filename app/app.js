@@ -1,53 +1,53 @@
-angular.module('MyApp', ['ngRoute', 'satellizer'])
+angular.module('app.config', ['ngRoute', 'satellizer'])
   .config(function($routeProvider, $locationProvider, $authProvider) {
     $locationProvider.html5Mode(true);
 
     $routeProvider
       .when('/', {
-        templateUrl: 'partials/home.html'
+        templateUrl: 'layout/home.html'
       })
       .when('/login', {
-        templateUrl: 'partials/login.html',
+        templateUrl: 'auth/login.html',
         controller: 'LoginCtrl',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/signup', {
-        templateUrl: 'partials/signup.html',
+        templateUrl: 'auth/signup.html',
         controller: 'SignupController',
         controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
-      .when('/account', {
-        templateUrl: 'partials/profile.html',
-        controller: 'ProfileController',
-        controllerAs: 'vm',
-        resolve: { loginRequired: loginRequired }
-      })
       .when('/forgot', {
-        templateUrl: 'partials/forgot.html',
+        templateUrl: 'auth/forgot.html',
         controller: 'ForgotCtrl',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/reset', {
-        templateUrl: 'partials/reset.html',
+        templateUrl: 'auth/reset.html',
         controller: 'ResetController',
         controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
       .when('/activate', {
-        templateUrl: 'partials/activate.html',
+        templateUrl: 'auth/activate.html',
         controller: 'ActivateController',
         controllerAs: 'vm',
         resolve: { skipIfAuthenticated: skipIfAuthenticated }
       })
+      .when('/account', {
+        templateUrl: 'user/profile.html',
+        controller: 'ProfileController',
+        controllerAs: 'vm',
+        resolve: { loginRequired: loginRequired }
+      })
       .when('/pointBoard', {
-        templateUrl: 'partials/pointBoard.html',
+        templateUrl: 'point-board/point-board.html',
         controller: 'PointController',
         controllerAs: 'vm',
         resolve: { loginRequired: loginRequired }
       })
       .otherwise({
-        templateUrl: 'partials/404.html'
+        templateUrl: 'layout/404.html'
       });
 
     $authProvider.loginUrl = '/login';

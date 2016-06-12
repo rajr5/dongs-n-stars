@@ -2,13 +2,13 @@
 'use strict';
 
   angular
-    .module('MyApp')
+    .module('app.auth')
     .controller('ResetController', ResetController);
 
   ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
   function ResetController($rootScope, $location, $window, $auth, Account) {
     var vm = this;
-    
+
     vm.resetPassword = resetPassword;
 
     activate();
@@ -31,7 +31,7 @@
       .catch((err) => {
         vm.messages= {
           error: Array.isArray(err.data) ? err.data : [err.data]
-        };  
+        };
       });
     }
   }
