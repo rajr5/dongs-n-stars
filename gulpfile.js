@@ -4,6 +4,7 @@ var argv = require('yargs').argv;
 var concat = require('gulp-concat');
 var ngAnnotate = require('gulp-ng-annotate');
 var templateCache = require('gulp-angular-templatecache');
+const babel = require('gulp-babel');
 // var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
 // var sourcemaps = require('gulp-sourcemaps');
@@ -12,6 +13,9 @@ var browserSync = require('browser-sync').create();
 
 gulp.task('angular', function() {
   return gulp.src(['!app/vendor/*','!app/test/**','!app/karma.conf.js','app/**/*.module.js','app/**/*.js'])
+    .pipe(babel({
+          presets: ['es2015']
+        }))
     .pipe(concat('application.js'))
     .pipe(ngAnnotate())
     .pipe(gulpif(argv.production, uglify()))
@@ -38,7 +42,8 @@ gulp.task('watch', function() {
 
 gulp.task('browser-sync-serve', function() {
  browserSync.init({
-   proxy: "localhost:3000"
+   proxy: "localhost:3000",
+   ws: true
   });
 });
 

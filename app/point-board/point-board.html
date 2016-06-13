@@ -1,16 +1,8 @@
 <div class="container-fluid">
   <div class="column">
     <div>
-      <div ng-if="vm.messages.error && vm.messages.error.length > 0" role="alert" class="alert alert-danger">
-        <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
-      </div>
-      <div ng-if="vm.messages.success && vm.messages.success.length > 0" role="alert" class="alert alert-success">
-        <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
-      </div>
     <div class="panel">
-
       <div class="panel-body">
-
        <div class="row">
          <div class="col-md-6">
         <div class="panel panel-default">
@@ -25,7 +17,22 @@
                       ng-repeat="user in vm.users | orderBy: 'name'"
                       ng-click="vm.selectUser(user)"
                       ng-class="{active: user === vm.user}">
-                        {{user.name}} ({{user.email}})
+                        <span
+                          data-toggle="tooltip"
+                          title="User is logged in"
+                          class="glyphicon glyphicon-star"
+                          aria-hidden="true"
+                          ng-show="user.loggedIn"
+                          style="color: blue;">
+                        </span>
+                        <span
+                          data-toggle="tooltip"
+                          title="User may not be logged in"
+                          class="glyphicon glyphicon-star-empty"
+                          aria-hidden="true"
+                          ng-show="!user.loggedIn">
+                        </span>
+                        <span>{{user.name}} ({{user.email}})</span>
                       </a>
                     </ul>
                   </div>
@@ -33,16 +40,22 @@
               </div>
             </div>
             <div class="row">
-              <form class="form-inline col-md-12 col-md-offset-1">
-                <div class="btn-group" data-toggle="buttons">
-                  <label class="btn btn-default active" ng-click="vm.setPointType('dong')">
-                    <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'dong'"> Dong
-                  </label>
-                  <label class="btn btn-default" ng-click="vm.setPointType('rockstar')">
-                    <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'rockstar'"> Rockstar
-                  </label>
-                </div>
-                  <button type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
+              <form class="form-inline col-md-12">
+                <div class="row">
+                  <spav class="col-md-4">
+                  <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-default active" ng-click="vm.setPointType('dong')">
+                      <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'dong'"> Dong
+                    </label>
+                    <label class="btn btn-default" ng-click="vm.setPointType('rockstar')">
+                      <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'rockstar'"> Rockstar
+                    </label>
+                  </div>
+                </spav>
+                <span class="col-md-offset-1 col-md-6">
+                    <button type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
+                    </span>
+                    </div>
               </form>
               <!--list group-->
           </div>
@@ -55,7 +68,9 @@
               </div>
               <div class="panel-body" style="height: 380px; overflow-y: scroll; overflow-x: none;">
                 <ul class="list-group">
-                  <li ng-repeat="recent in vm.recent | orderBy: '-voteDate'" class="list-group-item">
+                  <li class="list-group-item"
+                      ng-repeat="recent in vm.recent | orderBy: '-voteDate' track by $index"
+                      ng-class="{'list-group-item-success': recent.successClass}">
                     <span>{{recent.voteDate | date: 'short'}} - </span>
                     <span>{{recent.fromUser.name}}</span>
                     <span ng-class="recent.class">{{recent.verb}}</span>
@@ -68,6 +83,12 @@
                 </ul>
               </div>
               </div>
+                <div ng-if="vm.messages.error && vm.messages.error.length > 0" role="alert" class="alert alert-danger">
+                  <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
+                </div>
+                <div ng-if="vm.messages.success && vm.messages.success.length > 0" role="alert" class="alert alert-success">
+                  <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
+                </div>
             </div>
           </div>
         </div>

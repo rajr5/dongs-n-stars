@@ -5,8 +5,8 @@
     .module('app.point-board')
     .controller('PointController', PointController);
 
-  PointController.$inject = ['$timeout', 'Point', 'Account'];
-  function PointController($timeout, Point, Account) {
+  PointController.$inject = ['$scope','$timeout', '$q', 'Point', 'Account', 'Socket'];
+  function PointController($scope, $timeout, $q, Point, Account, Socket) {
     var vm = this;
 
     vm.userPoints = null;
@@ -26,8 +26,11 @@
     ////////////////
 
     function activate() {
+      vm.currentUser = $scope.currentUser;
       getUsersPoints();
       getRecent();
+      getUsers();
+      notifyLoggedIn(vm.currentUser);
     }
 
     function getUsersPoints() {
@@ -39,9 +42,13 @@
       .catch(function(response){
         setMsg(response.data, true);
       });
+    }
+
+    function getUsers() {
       Account.getUsers()
       .then(function(users) {
         vm.users = users.data;
+        getLoggedInUsers();
       })
       .catch(function(response){
         setMsg(response.data, true);
@@ -54,6 +61,12 @@
 
     function setPointType(pointType) {
       vm.pointType = pointType;
+    }
+
+    function pingServer() {
+      while(true) {
+
+      }
     }
 
     /**
@@ -71,6 +84,9 @@
         .then(function(userPoints) {
           enrichRecent([userPoints.data.userVote]);
           vm.recent.push(userPoints.data.userVote);
+          // emit point addition
+          notifyPoint(userPoints.data.userVote);
+          // Update userpoint list
           getUsersPoints();
           setMsg(userPoints.data, false);
           vm.user = null;
@@ -94,6 +110,9 @@
       .then(function(userPoints) {
         enrichRecent([userPoints.data.userVote]);
         vm.recent.push(userPoints.data.userVote);
+        // emit point change
+        notifyPoint(userPoints.data.userVote);
+        // update dong/rockstar
         getUsersPoints();
         setMsg(userPoints.data, false);
       })
@@ -124,6 +143,7 @@
 
     function enrichRecent(userVotes) {
       userVotes.map((currVal) => {
+        currVal.successClass = false;
         if (currVal.dong === -1 || currVal.rockstar === -1) {
           currVal.verb = 'removed';
           currVal.class = 'label label-info';
@@ -178,10 +198,94 @@
       if (vm.toPromise) {
         $timeout.cancel(vm.toPromise);
       }
-      vm.toPromise = $timeout(()=>{
-        vm.messages = {};
-      }, 2000, true);
+      vm.toPromise = setToEmpty(vm.messages, ['success', 'error'], 3000);
     }
+
+    ///////////////////// SOCKET FUNCTIONS
+
+
+    function notifyPoint(userVote) {
+      Socket.emit('point:change', userVote);
+    }
+
+    function notifyLoggedIn(loggedInUser) {
+      Socket.emit('user:newUserLoggedIn', loggedInUser);
+    }
+
+    function setToFalse(obj, prop, delay) {
+      return $timeout(()=>{
+        obj[prop] = false;
+      }, delay, true);
+    }
+
+
+    function setToEmpty(obj, props, delay) {
+      return $timeout(()=>{
+        if (!Array.isArray(props)) {
+          props = [props];
+        }
+        props.map(function(prop) {
+          delete obj[prop];
+        });
+      }, delay, true);
+    }
+
+    /**
+     * Someone added/removed a point
+     * Update view with new data
+     */
+    Socket.on('point:change', function(userVote) {
+      userVote.userVote.successClass = true;
+      setToFalse(userVote.userVote, 'successClass', 5000);
+      vm.recent.push(userVote.userVote);
+      // update board with point change
+      getUsersPoints();
+    });
+
+    /**
+     * Server asked for information about the logged in user
+     * Send back current logged in user info
+     */
+    Socket.on('user:userDetailReq', function(data, cb) {
+      cb(vm.currentUser);
+      Socket.emit('user:userDetailRes', vm.currentUser);
+    });
+
+    // A new user logged in, update logged in user list
+    Socket.on('user:loggedin', function(users) {
+        setLoggedInUsers(users.loggedInUsers);
+    });
+
+    // Update user list if a new user registers
+    Socket.on('users:newAccount', (obj) => {
+      getUsers();
+    });
+
+    /**
+     * Get all logged in users
+     */
+    function getLoggedInUsers() {
+      Socket.emit('user:getLoggedInUsers',{}, function(users) {
+        setLoggedInUsers(users.loggedInUsers);
+      });
+    }
+
+    /**
+     * Set which users are logged in
+     */
+    function setLoggedInUsers(users) {
+        vm.users.forEach(function(user) {
+          // See if userid is in logged in user map
+          if(users[user._id]) {
+            // yes, mark user as logged in
+            user.loggedIn = true;
+          } else {
+            // no, mark user as not logged in
+            user.loggedIn = false;
+          }
+        });
+    }
+
 
   }
 })();

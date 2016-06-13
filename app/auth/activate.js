@@ -5,8 +5,8 @@
     .module('app.auth')
     .controller('ActivateController', ActivateController);
 
-  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
-  function ActivateController($rootScope, $location, $window, $auth, Account) {
+  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Socket'];
+  function ActivateController($rootScope, $location, $window, $auth, Account, Socket) {
     var vm = this;
 
     activate();
@@ -18,13 +18,10 @@
     }
 
     function activateAccount() {
-      // Call out to server
-      // activate account
-      // log account in
-      // look into satellizer api docs
       var token = $location.search().token;
       Account.activateAccount(token)
       .then((response) => {
+        Socket.emit('users:newAccountActivated');
         $auth.setToken(response);
         $rootScope.currentUser = response.data.user;
         $window.localStorage.user = JSON.stringify(response.data.user);

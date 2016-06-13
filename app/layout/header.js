@@ -13,4 +13,6 @@ angular.module('app.layout')
       delete $window.localStorage.user;
       $location.path('/');
     };
+
+
   });

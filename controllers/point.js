@@ -3,7 +3,7 @@ var Point = require('../models/point');
 var UserPoint = require('../models/userPoint');
 var UserVote = require('../models/userVote');
 
-MAX_VOTES = 5;
+MAX_VOTES = 50;
 
 /**
  * 200 - OK success GET
@@ -171,7 +171,7 @@ exports.removeUserPoint = function(req, res) {
       if (!userPoint) {
         return sendJson(res, 400, {msg: 'You cannot remove a point from a user without any points of this type', error: err});
       }
-      
+
       // Push point (either rockstar or dong) to userPoint
       try {
         var pluralPointType = pointType + 's';

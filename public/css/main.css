@@ -46,10 +46,11 @@ footer {
 /* ------------------------- */
 
 .alert {
-  border-width: 0 0 0 3px;
+  margin-bottom: 0px;
+  padding: 5px;
 }
 
-.alert-info {
+/*.alert-info {
   border-color: #31708f;
 }
 
@@ -63,7 +64,7 @@ footer {
   color: #b61b17;
   background-color: #ffcdd2;
   border-color: #b61b17;
-}
+}*/
 
 /* Navbar
 /* ------------------------- */

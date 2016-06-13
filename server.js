@@ -10,6 +10,9 @@ var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var request = require('request');
+var http = require('http');
+var favicon = require('serve-favicon');
+
 
 // Load environment variables from .env file
 dotenv.load();
@@ -23,7 +26,6 @@ var PointController = require('./controllers/point');
 
 var app = express();
 
-
 mongoose.connect(process.env.MONGODB);
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
@@ -35,7 +37,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'node_modules')));
 
 app.use(expressValidator({
  customValidators: {
@@ -96,8 +100,14 @@ if (app.get('env') === 'production') {
   });
 }
 
-app.listen(app.get('port'), function() {
+var server = app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+var io = require('socket.io').listen(server);
+io.sockets.loggedIn = {}; // initialize user object
+var socketHandler = require('./services/socket-server');
+socketHandler.io(io); // pass in io so it is available in socketController
+io.sockets.on('connection', socketHandler.socketController);
 
 module.exports = app;
