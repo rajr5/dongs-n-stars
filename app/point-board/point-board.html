@@ -71,14 +71,16 @@
                   <li class="list-group-item"
                       ng-repeat="recent in vm.recent | orderBy: '-voteDate' track by $index"
                       ng-class="{'list-group-item-success': recent.successClass}">
-                    <span>{{recent.voteDate | date: 'short'}} - </span>
-                    <span>{{recent.fromUser.name}}</span>
-                    <span ng-class="recent.class">{{recent.verb}}</span>
-                    <span>{{recent.toUser.name}}<span ng-show="recent.verb === 'removed'">'s</span></span>
-                    <span ng-show="recent.verb === 'gave'">a</span>
-                    <span ng-class="{'label label-danger': recent.dong, 'label label-success': recent.rockstar}">{{recent.type}}</span>
-                    <span ng-show="recent.dong !== 0"> point</span>
-                    <span ng-show="recent.rockstar !== 0"> nomination</span>
+                    <div class="row">
+                      <span class="hidden-md hidden-sm hidden-xs">{{recent.voteDate | date: 'short'}} - </span>
+                      <span>{{recent.fromUser.name}}</span>
+                      <span ng-class="recent.class">{{recent.verb}}</span>
+                      <span>{{recent.toUser.name}}<span ng-show="recent.verb === 'removed'">'s</span></span>
+                      <span ng-show="recent.verb === 'gave'">a</span>
+                      <span ng-class="{'label label-danger': recent.dong, 'label label-success': recent.rockstar}">{{recent.type}}</span>
+                      <span ng-show="recent.dong !== 0"> point</span>
+                      <span ng-show="recent.rockstar !== 0"> nomination</span>
+                    </div>
                   </li>
                 </ul>
               </div>
@@ -108,6 +110,7 @@
           <div ng-if="messages.success" role="alert" class="alert alert-success">
             <div ng-repeat="success in messages.success">{{success.msg}}</div>
           </div>
+          <div class="table-responsive">
             <table class="table table-striped">
               <thead>
                 <td>#</td>
@@ -118,7 +121,7 @@
               <tbody>
                 <tr ng-repeat="point in vm.dongs | orderBy: '-count'">
                   <td>{{$index + 1}}</td>
-                  <td>{{point.name}} - ({{point.email}})</td>
+                  <td>{{point.name}}<br/>({{point.email}})</td>
                   <td>{{point.count}}</td>
                   <td>
                     <span ng-click="vm.createUserPoint(point.toUser, 'dong')" class="btn btn-warning btn-xs">Add</span> |
@@ -127,6 +130,7 @@
                 </tr>
               </tbody>
             </table>
+          </div>
         </div>
       </div>
       </div>
@@ -142,25 +146,27 @@
             <div ng-if="messages.success" role="alert" class="alert alert-success">
               <div ng-repeat="success in messages.success">{{success.msg}}</div>
             </div>
-            <table class="table table-striped">
-              <thead>
-                <td>#</td>
-                <td>Name</td>
-                <td>Points</td>
-                <td>Action</td>
-              </thead>
-              <tbody>
-                <tr ng-repeat="point in vm.rockstars | orderBy: '-count'">
-                  <td>{{$index + 1}}</td>
-                  <td>{{point.name}} - ({{point.email}})</td>
-                  <td>{{point.count}}</td>
-                  <td>
-                    <span ng-click="vm.createUserPoint(point.toUser, 'rockstar')" class="btn btn-warning btn-xs">Add</span> |
-                    <span ng-click="vm.removeUserPoint(point.toUser, 'rockstar')" class="btn btn-info btn-xs">Remove</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <td>#</td>
+                  <td>Name</td>
+                  <td>Points</td>
+                  <td>Action</td>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="point in vm.rockstars | orderBy: '-count'">
+                    <td>{{$index + 1}}</td>
+                    <td>{{point.name}}<br/>({{point.email}})</td>
+                    <td>{{point.count}}</td>
+                    <td>
+                      <span ng-click="vm.createUserPoint(point.toUser, 'rockstar')" class="btn btn-warning btn-xs">Add</span> |
+                      <span ng-click="vm.removeUserPoint(point.toUser, 'rockstar')" class="btn btn-info btn-xs">Remove</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
