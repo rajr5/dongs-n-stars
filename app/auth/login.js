@@ -5,7 +5,7 @@ angular.module('app.auth')
         .then(function(response) {
           $rootScope.currentUser = response.data.user;
           $window.localStorage.user = JSON.stringify(response.data.user);
-          $location.path('/account');
+          $location.path('/pointBoard');
         })
         .catch(function(response) {
           $scope.messages = {
@@ -19,7 +19,7 @@ angular.module('app.auth')
         .then(function(response) {
           $rootScope.currentUser = response.data.user;
           $window.localStorage.user = JSON.stringify(response.data.user);
-          $location.path('/');
+          $location.path('/pointBoard');
         })
         .catch(function(response) {
           if (response.error) {
