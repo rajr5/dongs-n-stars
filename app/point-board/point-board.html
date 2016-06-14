@@ -1,48 +1,58 @@
 <div class="container-fluid">
   <div class="column">
-    <div>
-    <div class="panel">
-      <div class="panel-body">
-       <div class="row">
-         <div class="col-md-6">
+    <div class="row">
+      <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Give a point</h3>
-              </div>
-                <div class="panel-body" style="overflow-y: scroll; min-height: 350px; max-height: 450px;">
-                  <div class="Column">
-                  <div class="row" style="max-height:350px;">
-                    <ul class="list-group">
-                      <a class="list-group-item"
-                      ng-repeat="user in vm.users | orderBy: 'name'"
-                      ng-click="vm.selectUser(user)"
-                      ng-class="{active: user === vm.user}">
-                        <span
-                          data-toggle="tooltip"
-                          title="User is logged in"
-                          class="glyphicon glyphicon-star"
-                          aria-hidden="true"
-                          ng-show="user.loggedIn"
-                          style="color: blue;">
-                        </span>
-                        <span
-                          data-toggle="tooltip"
-                          title="User may not be logged in"
-                          class="glyphicon glyphicon-star-empty"
-                          aria-hidden="true"
-                          ng-show="!user.loggedIn">
-                        </span>
-                        <span>{{user.name}} ({{user.email}})</span>
-                      </a>
-                    </ul>
-                  </div>
+            <div class="panel-title">Give a point <span>to {{vm.user.name}}</span>
+              <button
+                type="button"
+                class="btn btn-default pull-right"
+                ng-class="{active: vm.isVisible('givePoint')}"
+                ng-click="vm.toggleShow('givePoint')"
+                aria-label="Toggle Hide/Show">
+                <span
+                  class="glyphicon glyphicon-eye-open"
+                  ng-class="{'glyphicon-eye-open': vm.show.givePoint, 'glyphicon-eye-close': !vm.show.givePoint}"
+                  aria-hidden="true">
+                </span>
+              </button>
+            </div>
+            </div>
+              <div class="panel-body" ng-show="vm.show.givePoint" style="overflow-y: scroll; min-height: 350px; max-height: 450px;">
+                <div class="Column">
+                <div class="row" style="max-height:350px;">
+                  <ul class="list-group">
+                    <a class="list-group-item"
+                    ng-repeat="user in vm.users | orderBy: 'name'"
+                    ng-click="vm.selectUser(user)"
+                    ng-class="{active: user === vm.user}">
+                      <span
+                        data-toggle="tooltip"
+                        title="User is logged in"
+                        class="glyphicon glyphicon-star"
+                        aria-hidden="true"
+                        ng-show="user.loggedIn"
+                        style="color: blue;">
+                      </span>
+                      <span
+                        data-toggle="tooltip"
+                        title="User may not be logged in"
+                        class="glyphicon glyphicon-star-empty"
+                        aria-hidden="true"
+                        ng-show="!user.loggedIn">
+                      </span>
+                      <span>{{user.name}} ({{user.email}})</span>
+                    </a>
+                  </ul>
                 </div>
               </div>
             </div>
+            <div class="panel-footer" ng-show="vm.show.givePoint">
             <div class="row">
               <form class="form-inline col-md-12">
                 <div class="row">
-                  <spav class="col-md-4">
+                  <spav class="col-md-6">
                   <div class="btn-group" data-toggle="buttons">
                     <label class="btn btn-default active" ng-click="vm.setPointType('dong')">
                       <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'dong'"> Dong
@@ -52,21 +62,47 @@
                     </label>
                   </div>
                 </spav>
-                <span class="col-md-offset-1 col-md-6">
-                    <button type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
-                    </span>
-                    </div>
+                <span class="pull-right" style="padding-right:25px;">
+                  <button type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
+                </span>
+              </div>
               </form>
               <!--list group-->
-          </div>
+            </div>
+            </div>
+            </div>
+              <div class="row" style="min-height:30px">
+                <div ng-show="vm.messages.error && vm.messages.error.length > 0" role="alert" class="alert alert-danger">
+                  <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
+                </div>
+                <div ng-show="vm.messages.success && vm.messages.success.length > 0" role="alert" class="alert alert-success">
+                  <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
+                </div>
+              </div>
          </div>
-
+         <!---------------------------- RECENT ACTIVITY -------------------->
           <div class="col-md-6">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Recent Activity</h3>
+                <div class="panel-title">Recent Activity
+                  <button
+                    type="button"
+                    class="btn btn-default pull-right"
+                    ng-class="{active: vm.isVisible('recentActivity')}"
+                    ng-click="vm.toggleShow('recentActivity')"
+                    aria-label="Toggle Hide/Show">
+                    <span
+                      class="glyphicon glyphicon-eye-open"
+                      ng-class="{'glyphicon-eye-open': vm.show.recentActivity, 'glyphicon-eye-close': !vm.show.recentActivity}"
+                      aria-hidden="true">
+                    </span>
+                  </button>
+                </div>
               </div>
-              <div class="panel-body" style="height: 380px; overflow-y: scroll; overflow-x: none;">
+              <div
+                class="panel-body"
+                ng-show="vm.show.recentActivity"
+                style="height: 380px; overflow-y: scroll; overflow-x: none;">
                 <ul class="list-group">
                   <li class="list-group-item"
                       ng-repeat="recent in vm.recent | orderBy: '-voteDate' track by $index"
@@ -84,26 +120,32 @@
                   </li>
                 </ul>
               </div>
-              </div>
-                <div ng-if="vm.messages.error && vm.messages.error.length > 0" role="alert" class="alert alert-danger">
-                  <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
-                </div>
-                <div ng-if="vm.messages.success && vm.messages.success.length > 0" role="alert" class="alert alert-success">
-                  <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
-                </div>
             </div>
           </div>
         </div>
 
-      </div>
-
+<!-- Bottom Section Dongs and Rockstars-->
+  <!-- Dongs -->
     <div class="row">
       <div class="col-md-6">
       <div class="panel panel-danger">
         <div class="panel-heading">
-          <h3 class="panel-title">Dongs</h3>
+          <div class="panel-title">Dongs
+            <button
+              type="button"
+              class="btn btn-default pull-right"
+              ng-class="{active: vm.isVisible('dong')}"
+              ng-click="vm.toggleShow('dong')"
+              aria-label="Toggle Hide/Show">
+              <span
+                class="glyphicon glyphicon-eye-open"
+                ng-class="{'glyphicon-eye-open': vm.show.dong, 'glyphicon-eye-close': !vm.show.dong}"
+                aria-hidden="true">
+              </span>
+            </button>
+            </div>
         </div>
-        <div class="panel-body">
+        <div class="panel-body" ng-show="vm.show.dong">
           <div ng-if="messages.error" role="alert" class="alert alert-danger">
             <div ng-repeat="error in messages.error">{{error.msg}}</div>
           </div>
@@ -134,12 +176,26 @@
         </div>
       </div>
       </div>
+      <!--Rockstars -->
       <div class="col-md-6">
         <div class="panel panel-success" class="col-md-6">
           <div class="panel-heading" class="col-md-6">
-            <h3 class="panel-title">Rockstars</h3>
+            <div class="panel-title">Rockstars
+            <button
+              type="button"
+              class="btn btn-default pull-right"
+              ng-class="{active: vm.isVisible('rockstar')}"
+              ng-click="vm.toggleShow('rockstar')"
+              aria-label="Toggle Hide/Show">
+              <span
+                class="glyphicon glyphicon-eye-open"
+                ng-class="{'glyphicon-eye-open': vm.show.rockstar, 'glyphicon-eye-close': !vm.show.rockstar}"
+                aria-hidden="true">
+              </span>
+            </button>
+            </div>
           </div>
-          <div class="panel-body">
+          <div class="panel-body" ng-show="vm.show.rockstar">
             <div ng-if="messages.error" role="alert" class="alert alert-danger">
               <div ng-repeat="error in messages.error">{{error.msg}}</div>
             </div>

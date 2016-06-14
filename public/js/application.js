@@ -341,12 +341,21 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     vm.rockstars = [];
     vm.recent = [];
     vm.pointType = 'dong';
+    vm.show = {
+      recentActivity: true,
+      givePoint: true,
+      rockstar: true,
+      dong: true
+    };
+    vm.showRecentActivity = true;
 
     vm.setPointType = setPointType;
     vm.getUsersPoints = getUsersPoints;
     vm.createUserPoint = createUserPoint;
     vm.removeUserPoint = removeUserPoint;
     vm.selectUser = selectUser;
+    vm.toggleShow = toggleShow;
+    vm.isVisible = isVisible;
 
     activate();
 
@@ -388,6 +397,14 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 
     function pingServer() {
       while (true) {}
+    }
+
+    function toggleShow(key) {
+      vm.show[key] = !vm.show[key];
+    }
+
+    function isVisible(key) {
+      return vm.show[key];
     }
 
     /**
