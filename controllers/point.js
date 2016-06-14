@@ -3,7 +3,7 @@ var Point = require('../models/point');
 var UserPoint = require('../models/userPoint');
 var UserVote = require('../models/userVote');
 
-MAX_VOTES = 50;
+MAX_VOTES = 5;
 
 /**
  * 200 - OK success GET
