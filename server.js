@@ -23,6 +23,7 @@ var User = require('./models/user');
 // Controllers
 var UserController = require('./controllers/user');
 var PointController = require('./controllers/point');
+var StatController = require('./controllers/stats');
 
 var app = express();
 
@@ -83,6 +84,8 @@ app.get('/userVotes', PointController.getUserVotes);
 app.get('/userPoints/:id', PointController.getUserPoints);
 app.post('/point', PointController.createUserPoint);
 app.delete('/point/:toUser/:pointType', PointController.removeUserPoint);
+
+app.get('/stats', StatController.getStats);
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'app', 'index.html'));
