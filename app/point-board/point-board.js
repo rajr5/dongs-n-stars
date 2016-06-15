@@ -151,6 +151,7 @@
       // update recent obj
       Point.getUserVotes()
       .then(function(recent) {
+
         enrichRecent(recent.data.userVotes);
         vm.recent = recent.data.userVotes;
       })

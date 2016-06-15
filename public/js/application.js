@@ -467,6 +467,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
       // get recent
       // update recent obj
       Point.getUserVotes().then(function (recent) {
+
         enrichRecent(recent.data.userVotes);
         vm.recent = recent.data.userVotes;
       }).catch(function (err) {});
