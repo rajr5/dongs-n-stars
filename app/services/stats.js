@@ -8,16 +8,16 @@
   Stats.$inject = ['$http'];
   function Stats($http) {
     var service = {
-      getStats:getStat
+      getStats:getStats
     };
 
     return service;
 
     ////////////////
-    function getStat(data) {
+    function getStats(query) {
       var options = {};
-      options.query = query;
-      return $http.get('/stats');
+      options.params = query;
+      return $http.get('/api/stats', options);
     }
   }
 })();
