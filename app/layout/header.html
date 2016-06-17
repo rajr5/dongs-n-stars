@@ -13,6 +13,8 @@
       <ul class="nav navbar-nav">
         <li ng-class="{ active: isActive('/')}"><a href="/">Home</a></li>
         <li ng-class="{ active: isActive('/pointBoard')}"><a href="/pointBoard">Point Board</a></li>
+        <li ng-class="{ active: isActive('/stats')}"><a href="/stats">Stats</a></li>
+        <li ng-class="{ active: isActive('/allActivity')}"><a href="/allActivity">All Activity</a></li>
       </ul>
       <ul ng-if="isAuthenticated()" class="nav navbar-nav navbar-right">
         <li class="dropdown">

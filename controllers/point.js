@@ -94,7 +94,8 @@ exports.createUserPoint = function(req, res) {
   var userVote = new UserVote({
     fromUser: fromUserId,
     toUser: toUserId,
-    type: pointType
+    type: pointType,
+    message: message
   });
   userVote[pointType] = 1;
 
@@ -114,7 +115,7 @@ exports.createUserPoint = function(req, res) {
       userPoint[pluralPointType].push({
           type: pointType,
           fromUser: fromUserId,
-          msg: message
+          message: message
         });
       userPoint.save((err)=>{
         if (err) {

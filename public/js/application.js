@@ -5,14 +5,12 @@
 
   angular.module('app', [
   /** Application Modules */
-  'app.config', 'app.auth', 'app.layout', 'app.services', 'app.user', 'app.point-board', 'app.templates']);
-})();
-'use strict';
+  'app.config', 'app.auth', 'app.layout', 'app.services', 'app.user', 'app.point-board', 'app.templates', 'app.stats',
+  /** Angular Modules */
+  'ngAnimate', 'ngTouch',
 
-(function () {
-  'use strict';
-
-  angular.module('app.config', ['ngRoute', 'satellizer']);
+  /** 3rd Party Modules */
+  'ui.bootstrap']);
 })();
 'use strict';
 
@@ -20,6 +18,13 @@
   'use strict';
 
   angular.module('app.auth', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.config', ['ngRoute', 'satellizer']);
 })();
 'use strict';
 
@@ -47,31 +52,6 @@
 (function () {
   'use strict';
 
-  angular.module('app.stats').controller('StatsController', StatsController);
-
-  StatsController.$inject = ['Stats'];
-  function StatsController(Stats) {
-    var vm = this;
-
-    activate();
-
-    ////////////////
-
-    function activate() {
-      getStats();
-    }
-
-    function getStats() {
-      // build query strings as needed
-      Stats.getStats().then(function (stats) {}).catch(function (err) {});
-    }
-  }
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
   angular.module('app.services', []);
 })();
 'use strict';
@@ -79,79 +59,14 @@
 (function () {
   'use strict';
 
-  angular.module('app.user', []);
+  angular.module('app.stats', []);
 })();
 'use strict';
 
 (function () {
   'use strict';
 
-  angular.module('app.config').config(["$routeProvider", "$locationProvider", "$authProvider", function ($routeProvider, $locationProvider, $authProvider) {
-    skipIfAuthenticated.$inject = ["$location", "$auth"];
-    loginRequired.$inject = ["$location", "$auth"];
-    $locationProvider.html5Mode(true);
-
-    $routeProvider.when('/', {
-      templateUrl: 'layout/home.html',
-      controller: 'HomeController',
-      controllerAs: 'vm'
-    }).when('/login', {
-      templateUrl: 'auth/login.html',
-      controller: 'LoginCtrl',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/signup', {
-      templateUrl: 'auth/signup.html',
-      controller: 'SignupController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/forgot', {
-      templateUrl: 'auth/forgot.html',
-      controller: 'ForgotCtrl',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/reset', {
-      templateUrl: 'auth/reset.html',
-      controller: 'ResetController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/activate', {
-      templateUrl: 'auth/activate.html',
-      controller: 'ActivateController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/account', {
-      templateUrl: 'user/profile.html',
-      controller: 'ProfileController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).when('/pointBoard', {
-      templateUrl: 'point-board/point-board.html',
-      controller: 'PointController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).otherwise({
-      templateUrl: 'layout/404.html'
-    });
-
-    $authProvider.loginUrl = '/login';
-    $authProvider.signupUrl = '/signup';
-
-    function skipIfAuthenticated($location, $auth) {
-      if ($auth.isAuthenticated()) {
-        $location.path('/');
-      }
-    }
-
-    function loginRequired($location, $auth) {
-      if (!$auth.isAuthenticated()) {
-        $location.path('/login');
-      }
-    }
-  }]).run(["$rootScope", "$window", function ($rootScope, $window) {
-    if ($window.localStorage.user) {
-
-      $rootScope.currentUser = JSON.parse($window.localStorage.user);
-    }
-  }]);
+  angular.module('app.user', []);
 })();
 'use strict';
 
@@ -311,6 +226,83 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
 })();
 'use strict';
 
+(function () {
+  'use strict';
+
+  angular.module('app.config').config(["$routeProvider", "$locationProvider", "$authProvider", function ($routeProvider, $locationProvider, $authProvider) {
+    skipIfAuthenticated.$inject = ["$location", "$auth"];
+    loginRequired.$inject = ["$location", "$auth"];
+    $locationProvider.html5Mode(true);
+
+    $routeProvider.when('/', {
+      templateUrl: 'layout/home.html',
+      controller: 'HomeController',
+      controllerAs: 'vm'
+    }).when('/login', {
+      templateUrl: 'auth/login.html',
+      controller: 'LoginCtrl',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/signup', {
+      templateUrl: 'auth/signup.html',
+      controller: 'SignupController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/forgot', {
+      templateUrl: 'auth/forgot.html',
+      controller: 'ForgotCtrl',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/reset', {
+      templateUrl: 'auth/reset.html',
+      controller: 'ResetController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/activate', {
+      templateUrl: 'auth/activate.html',
+      controller: 'ActivateController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/account', {
+      templateUrl: 'user/profile.html',
+      controller: 'ProfileController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).when('/pointBoard', {
+      templateUrl: 'point-board/point-board.html',
+      controller: 'PointController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).when('/stats', {
+      templateUrl: 'stats/stats.html',
+      controller: 'StatsController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).otherwise({
+      templateUrl: 'layout/404.html'
+    });
+
+    $authProvider.loginUrl = '/login';
+    $authProvider.signupUrl = '/signup';
+
+    function skipIfAuthenticated($location, $auth) {
+      if ($auth.isAuthenticated()) {
+        $location.path('/');
+      }
+    }
+
+    function loginRequired($location, $auth) {
+      if (!$auth.isAuthenticated()) {
+        $location.path('/login');
+      }
+    }
+  }]).run(["$rootScope", "$window", function ($rootScope, $window) {
+    if ($window.localStorage.user) {
+
+      $rootScope.currentUser = JSON.parse($window.localStorage.user);
+    }
+  }]);
+})();
+'use strict';
+
 angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function ($scope, $location, $window, $auth) {
   $scope.isActive = function (viewLocation) {
     return viewLocation === $location.path();
@@ -366,6 +358,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     vm.rockstars = [];
     vm.recent = [];
     vm.pointType = 'dong';
+    vm.message = null;
     vm.show = {
       recentActivity: true,
       givePoint: true,
@@ -435,13 +428,14 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     /**
      * ADD user point
      */
-    function createUserPoint(toUser, pointType) {
+    function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
         setMsg({ msg: 'You must select a user' }, true);
       } else {
         var data = {
           pointType: pointType,
-          toUser: toUser
+          toUser: toUser,
+          message: message
         };
         Point.createPoint(data).then(function (userPoints) {
           enrichRecent([userPoints.data.userVote]);
@@ -452,6 +446,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
           getUsersPoints();
           setMsg(userPoints.data, false);
           vm.user = null;
+          vm.message = null;
         }).catch(function (response) {
           setMsg(response.data, true);
           vm.user = null;
@@ -644,13 +639,6 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 })();
 'use strict';
 
-(function () {
-  'use strict';
-
-  angular.module('app.stats', []);
-})();
-'use strict';
-
 angular.module('app.services').factory('Account', ["$http", function ($http) {
   return {
     updateProfile: function updateProfile(data) {
@@ -771,6 +759,33 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
       var options = {};
       options.query = query;
       return $http.get('/stats');
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.stats').controller('StatsController', StatsController);
+
+  StatsController.$inject = ['Stats'];
+  function StatsController(Stats) {
+    var vm = this;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+      getStats();
+    }
+
+    function getStats() {
+      // build query strings as needed
+      Stats.getStats().then(function (stats) {
+        console.log('stats');
+      }).catch(function (err) {});
     }
   }
 })();
