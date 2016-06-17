@@ -5,7 +5,13 @@
 
   angular.module('app', [
   /** Application Modules */
-  'app.config', 'app.auth', 'app.layout', 'app.services', 'app.user', 'app.point-board', 'app.templates']);
+  'app.config', 'app.auth', 'app.layout', 'app.services', 'app.user', 'app.point-board', 'app.templates',
+
+  /** Angular Modules */
+  'ngAnimate', 'ngTouch',
+
+  /** 3rd Party Modules */
+  'ui.bootstrap']);
 })();
 'use strict';
 
@@ -341,6 +347,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     vm.rockstars = [];
     vm.recent = [];
     vm.pointType = 'dong';
+    vm.message = null;
     vm.show = {
       recentActivity: true,
       givePoint: true,
@@ -410,13 +417,14 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     /**
      * ADD user point
      */
-    function createUserPoint(toUser, pointType) {
+    function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
         setMsg({ msg: 'You must select a user' }, true);
       } else {
         var data = {
           pointType: pointType,
-          toUser: toUser
+          toUser: toUser,
+          message: message
         };
         Point.createPoint(data).then(function (userPoints) {
           enrichRecent([userPoints.data.userVote]);
@@ -427,6 +435,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
           getUsersPoints();
           setMsg(userPoints.data, false);
           vm.user = null;
+          vm.message = null;
         }).catch(function (response) {
           setMsg(response.data, true);
           vm.user = null;

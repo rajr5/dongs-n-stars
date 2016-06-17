@@ -10,7 +10,8 @@ var userVoteSchema = new mongoose.Schema({
   type: String,
   dong: { type: Number, default : 0 },
   rockstar: { type: Number, default : 0 },
-  voteDate: { type: Date, default: Date.now }
+  voteDate: { type: Date, default: Date.now },
+  message: { type: String }
 }, schemaOptions);
 
 var UserVote = mongoose.model('UserVote', userVoteSchema);

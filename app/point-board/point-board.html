@@ -28,17 +28,17 @@
                     ng-click="vm.selectUser(user)"
                     ng-class="{active: user === vm.user}">
                       <span
-                        data-toggle="tooltip"
-                        title="User is logged in"
-                        class="glyphicon glyphicon-star"
+                        uib-tooltip="{{user.name}} is logged in"
+                        tooltip-placement="right"
+                        class="glyphicon glyphicon-user text-success"
                         aria-hidden="true"
                         ng-show="user.loggedIn"
                         style="color: blue;">
                       </span>
                       <span
-                        data-toggle="tooltip"
-                        title="User may not be logged in"
-                        class="glyphicon glyphicon-star-empty"
+                        uib-tooltip="{{user.name}} is not be logged in"
+                        tooltip-placement="right"
+                        class="glyphicon glyphicon-user text-muted"
                         aria-hidden="true"
                         ng-show="!user.loggedIn">
                       </span>
@@ -49,26 +49,34 @@
               </div>
             </div>
             <div class="panel-footer" ng-show="vm.show.givePoint">
-            <div class="row">
-              <form class="form-inline col-md-12">
+              <div class="column">
                 <div class="row">
-                  <spav class="col-md-6">
-                  <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-default active" ng-click="vm.setPointType('dong')">
-                      <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'dong'"> Dong
-                    </label>
-                    <label class="btn btn-default" ng-click="vm.setPointType('rockstar')">
-                      <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'rockstar'"> Rockstar
-                    </label>
-                  </div>
-                </spav>
-                <span class="pull-right" style="padding-right:25px;">
-                  <button type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
-                </span>
-              </div>
-              </form>
+                  <span class="col-md-12">
+                      <div class="form-group">
+                        <textarea ng-model="vm.message" class="form-control" rows="2" placeholder="{{vm.pointType}} message"></textarea>
+                      </div>
+                    </span>
+                </div>
+                <div class="row">
+                  <form class="form-inline col-md-12">
+                    <spav class="col-md-6">
+                      <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-default active" ng-click="vm.setPointType('dong')">
+                          <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'dong'"> Dong
+                        </label>
+                        <label class="btn btn-default" ng-click="vm.setPointType('rockstar')">
+                          <input type="radio" autocomplete="off" ng-checked="vm.pointType === 'rockstar'"> Rockstar
+                        </label>
+                      </div>
+                    </spav>
+                    <span class="pull-right" style="padding-right:25px;">
+                      <button type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType, vm.message)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
+                    </span>
+                  </form>
+                </div> <!-- end row -->
+              </div> <!-- end column -->
+
               <!--list group-->
-            </div>
             </div>
             </div>
               <div class="row" style="min-height:30px">
@@ -92,7 +100,7 @@
                     ng-click="vm.toggleShow('recentActivity')"
                     aria-label="Toggle Hide/Show">
                     <span
-                      class="glyphicon glyphicon-eye-open"
+                      class="glyphicon"
                       ng-class="{'glyphicon-eye-open': vm.show.recentActivity, 'glyphicon-eye-close': !vm.show.recentActivity}"
                       aria-hidden="true">
                     </span>
@@ -116,6 +124,18 @@
                       <span ng-class="{'label label-danger': recent.dong, 'label label-success': recent.rockstar}">{{recent.type}}</span>
                       <span ng-show="recent.dong !== 0"> point</span>
                       <span ng-show="recent.rockstar !== 0"> nomination</span>
+                      </span>
+                      <span
+                        uib-popover="{{recent.message}}"
+                        popover-trigger="mouseenter click"
+                        popover-placement="bottom-right"
+                        popover-popup-close-delay="500"
+                        popover-title="Message"
+                        class="glyphicon glyphicon-comment text-primary pull-right"
+                        style="padding-right: 10px"
+                        ng-show="recent.message"
+                        aria-hidden="true">
+                      </span>
                     </div>
                   </li>
                 </ul>

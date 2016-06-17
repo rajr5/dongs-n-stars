@@ -6,7 +6,10 @@
     'app.config','app.auth', 'app.layout', 'app.services',
     'app.user', 'app.point-board', 'app.templates',
 
-    /** 3rd Party Modules */
+    /** Angular Modules */
+    'ngAnimate', 'ngTouch',
 
+    /** 3rd Party Modules */
+    'ui.bootstrap',
   ]);
 })();
