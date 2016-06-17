@@ -51,6 +51,12 @@
           controllerAs: 'vm',
           resolve: { loginRequired: loginRequired }
         })
+        .when('/stats', {
+          templateUrl: 'stats/stats.html',
+          controller: 'StatsController',
+          controllerAs: 'vm',
+          resolve: { loginRequired: loginRequired }
+        })
         .otherwise({
           templateUrl: 'layout/404.html'
         });
