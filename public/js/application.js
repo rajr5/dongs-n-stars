@@ -31,6 +31,13 @@
 (function () {
   'use strict';
 
+  angular.module('app.point-board', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
   angular.module('app.layout', []);
 })();
 'use strict';
@@ -39,13 +46,6 @@
   'use strict';
 
   angular.module('app.templates', []);
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.point-board', []);
 })();
 'use strict';
 
@@ -280,8 +280,8 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
       templateUrl: 'layout/404.html'
     });
 
-    $authProvider.loginUrl = '/login';
-    $authProvider.signupUrl = '/signup';
+    $authProvider.loginUrl = '/api/login';
+    $authProvider.signupUrl = '/api/signup';
 
     function skipIfAuthenticated($location, $auth) {
       if ($auth.isAuthenticated()) {
@@ -300,47 +300,6 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
       $rootScope.currentUser = JSON.parse($window.localStorage.user);
     }
   }]);
-})();
-'use strict';
-
-angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function ($scope, $location, $window, $auth) {
-  $scope.isActive = function (viewLocation) {
-    return viewLocation === $location.path();
-  };
-
-  $scope.isAuthenticated = function () {
-    return $auth.isAuthenticated();
-  };
-
-  $scope.logout = function () {
-    $auth.logout();
-    delete $window.localStorage.user;
-    $location.path('/');
-  };
-}]);
-'use strict';
-
-(function () {
-    'use strict';
-
-    angular.module('app.layout').controller('HomeController', HomeController);
-
-    HomeController.$inject = ['$scope', '$auth'];
-    function HomeController($scope, $auth) {
-        var vm = this;
-
-        vm.isAuthenticated = isAuthenticated;
-
-        activate();
-
-        ////////////////
-
-        function activate() {}
-
-        function isAuthenticated() {
-            return $auth.isAuthenticated();
-        }
-    }
 })();
 'use strict';
 
@@ -639,6 +598,47 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 })();
 'use strict';
 
+angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function ($scope, $location, $window, $auth) {
+  $scope.isActive = function (viewLocation) {
+    return viewLocation === $location.path();
+  };
+
+  $scope.isAuthenticated = function () {
+    return $auth.isAuthenticated();
+  };
+
+  $scope.logout = function () {
+    $auth.logout();
+    delete $window.localStorage.user;
+    $location.path('/');
+  };
+}]);
+'use strict';
+
+(function () {
+    'use strict';
+
+    angular.module('app.layout').controller('HomeController', HomeController);
+
+    HomeController.$inject = ['$scope', '$auth'];
+    function HomeController($scope, $auth) {
+        var vm = this;
+
+        vm.isAuthenticated = isAuthenticated;
+
+        activate();
+
+        ////////////////
+
+        function activate() {}
+
+        function isAuthenticated() {
+            return $auth.isAuthenticated();
+        }
+    }
+})();
+'use strict';
+
 angular.module('app.services').factory('Account', ["$http", function ($http) {
   return {
     updateProfile: function updateProfile(data) {
@@ -789,7 +789,6 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     ////////////////
 
     function activate() {
-      console.log('here!');
       getStats(1, true);
       getStats(3);
       getStats(5);
@@ -802,12 +801,10 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
       isOpen = isOpen || false;
       // build query strings as needed
       Stats.getStats({ numDays: numDays }).then(function (stats) {
-        console.log('stats', stats);
         vm.mostPoints[numDays] = stats.data;
         vm.mostPoints[numDays].isOpen = isOpen;
         addMessages(vm.mostPoints[numDays].dongs, 'dongs');
         addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
-        console.log(vm.mostPoints);
       }).catch(function (err) {
         console.log('err', err);
       });
@@ -822,7 +819,6 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     function getMessagesHtml(pointArray) {
       var hasMsg = false;
       var html = '<ul style=" padding-left:5px;">';
-      console.log('pointArray', pointArray);
       pointArray.forEach(function (element) {
         if (element.message) {
           hasMsg = true;
@@ -830,7 +826,6 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
         }
       });
       html += '</ul>';
-      console.log(html);
       if (hasMsg) {
         return $sce.trustAsHtml(html);
       } else {

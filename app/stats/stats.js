@@ -25,7 +25,6 @@
     ////////////////
 
     function activate() {
-      console.log('here!');
       getStats(1, true);
       getStats(3);
       getStats(5);
@@ -39,12 +38,10 @@
       // build query strings as needed
       Stats.getStats({numDays: numDays})
       .then(function(stats) {
-        console.log('stats', stats);
         vm.mostPoints[numDays] = stats.data;
         vm.mostPoints[numDays].isOpen = isOpen;
         addMessages(vm.mostPoints[numDays].dongs, 'dongs');
         addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
-        console.log(vm.mostPoints);
       })
       .catch(function(err){
         console.log('err', err);
@@ -60,7 +57,6 @@
     function getMessagesHtml(pointArray) {
       var hasMsg = false;
       var html = '<ul style=" padding-left:5px;">';
-      console.log('pointArray', pointArray);
       pointArray.forEach(function(element) {
         if (element.message) {
           hasMsg = true;
@@ -68,7 +64,6 @@
         }
       });
       html += '</ul>';
-      console.log(html);
       if (hasMsg) {
         return $sce.trustAsHtml(html);
       } else {

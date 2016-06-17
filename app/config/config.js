@@ -61,8 +61,8 @@
           templateUrl: 'layout/404.html'
         });
 
-      $authProvider.loginUrl = '/login';
-      $authProvider.signupUrl = '/signup';
+      $authProvider.loginUrl = '/api/login';
+      $authProvider.signupUrl = '/api/signup';
 
       function skipIfAuthenticated($location, $auth) {
         if ($auth.isAuthenticated()) {
