@@ -58,10 +58,11 @@ exports.getUserPoints = function(req, res) {
  * GET /userVotes
  */
 exports.getUserVotes = function(req, res) {
-  var limit = req.query.limit || 50;
+  var limit = req.query.limit || 75;
   UserVote.find({})
   .populate('fromUser toUser')
   .limit(limit)
+  .sort({voteDate: -1})
   .exec((err, userVotes) => {
     if (err) {
       return sendJson(res, 404);
@@ -93,7 +94,8 @@ exports.createUserPoint = function(req, res) {
   var userVote = new UserVote({
     fromUser: fromUserId,
     toUser: toUserId,
-    type: pointType
+    type: pointType,
+    message: message
   });
   userVote[pointType] = 1;
 
@@ -113,7 +115,7 @@ exports.createUserPoint = function(req, res) {
       userPoint[pluralPointType].push({
           type: pointType,
           fromUser: fromUserId,
-          msg: message
+          message: message
         });
       userPoint.save((err)=>{
         if (err) {

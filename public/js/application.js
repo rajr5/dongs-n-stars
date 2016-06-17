@@ -5,7 +5,12 @@
 
   angular.module('app', [
   /** Application Modules */
-  'app.config', 'app.auth', 'app.layout', 'app.services', 'app.user', 'app.point-board', 'app.templates']);
+  'app.config', 'app.auth', 'app.layout', 'app.services', 'app.user', 'app.point-board', 'app.templates', 'app.stats',
+  /** Angular Modules */
+  'ngAnimate', 'ngTouch',
+
+  /** 3rd Party Modules */
+  'ui.bootstrap']);
 })();
 'use strict';
 
@@ -48,6 +53,13 @@
   'use strict';
 
   angular.module('app.services', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.stats', []);
 })();
 'use strict';
 
@@ -259,6 +271,11 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
       controller: 'PointController',
       controllerAs: 'vm',
       resolve: { loginRequired: loginRequired }
+    }).when('/stats', {
+      templateUrl: 'stats/stats.html',
+      controller: 'StatsController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
     }).otherwise({
       templateUrl: 'layout/404.html'
     });
@@ -341,6 +358,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     vm.rockstars = [];
     vm.recent = [];
     vm.pointType = 'dong';
+    vm.message = null;
     vm.show = {
       recentActivity: true,
       givePoint: true,
@@ -410,13 +428,14 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     /**
      * ADD user point
      */
-    function createUserPoint(toUser, pointType) {
+    function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
         setMsg({ msg: 'You must select a user' }, true);
       } else {
         var data = {
           pointType: pointType,
-          toUser: toUser
+          toUser: toUser,
+          message: message
         };
         Point.createPoint(data).then(function (userPoints) {
           enrichRecent([userPoints.data.userVote]);
@@ -427,6 +446,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
           getUsersPoints();
           setMsg(userPoints.data, false);
           vm.user = null;
+          vm.message = null;
         }).catch(function (response) {
           setMsg(response.data, true);
           vm.user = null;
@@ -467,6 +487,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
       // get recent
       // update recent obj
       Point.getUserVotes().then(function (recent) {
+
         enrichRecent(recent.data.userVotes);
         vm.recent = recent.data.userVotes;
       }).catch(function (err) {});
@@ -621,25 +642,25 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 angular.module('app.services').factory('Account', ["$http", function ($http) {
   return {
     updateProfile: function updateProfile(data) {
-      return $http.put('/account', data);
+      return $http.put('/api/account', data);
     },
     changePassword: function changePassword(data) {
-      return $http.put('/account', data);
+      return $http.put('/api/account', data);
     },
     deleteAccount: function deleteAccount() {
-      return $http.delete('/account');
+      return $http.delete('/api/account');
     },
     forgotPassword: function forgotPassword(data) {
-      return $http.post('/forgot', data);
+      return $http.post('/api/forgot', data);
     },
     resetPassword: function resetPassword(token, data) {
-      return $http.post('/reset/' + token, data);
+      return $http.post('/api/reset/' + token, data);
     },
     activateAccount: function activateAccount(token, data) {
-      return $http.post('/activate/' + token, data);
+      return $http.post('/api/activate/' + token, data);
     },
     getUsers: function getUsers(data) {
-      return $http.get('/users', data);
+      return $http.get('/api/users', data);
     }
   };
 }]);
@@ -650,25 +671,25 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     getUsersPoints: function getUsersPoints(query) {
       var options = {};
       options.query = query;
-      return $http.get('/userPoints', options);
+      return $http.get('/api/userPoints', options);
     },
     getUserPoints: function getUserPoints(id, query) {
       var options = {};
       options.query = query;
-      return $http.get('/userPoints/' + id, options);
+      return $http.get('/api/userPoints/' + id, options);
     },
     getUserVotes: function getUserVotes(id, query) {
       var options = {};
       options.query = query;
-      return $http.get('/userVotes', options);
+      return $http.get('/api/userVotes', options);
     },
     createPoint: function createPoint(data) {
-      return $http.post('/point', data);
+      return $http.post('/api/point', data);
     },
     removePoint: function removePoint(toUser, pointType, query) {
       var options = {};
       options.query = query || {};
-      return $http.delete('/point/' + toUser + '/' + pointType, options);
+      return $http.delete('/api/point/' + toUser + '/' + pointType, options);
     }
   };
 }]);
@@ -715,6 +736,106 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 
     function disconnect(eventName, data, callback) {
       socket.disconnect();
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.services').factory('Stats', Stats);
+
+  Stats.$inject = ['$http'];
+  function Stats($http) {
+    var service = {
+      getStats: getStats
+    };
+
+    return service;
+
+    ////////////////
+    function getStats(query) {
+      var options = {};
+      options.params = query;
+      return $http.get('/api/stats', options);
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.stats').controller('StatsController', StatsController);
+
+  StatsController.$inject = ['$sce', 'Stats'];
+  function StatsController($sce, Stats) {
+    var vm = this;
+
+    // 7: {
+    //   numDays: 7,
+    //   dongs: [],
+    //   rockstars: []
+    // }
+    vm.mostPoints = {};
+
+    vm.rockstarTemplate = '/stats/stats.popup.html';
+
+    vm.getMessagesHtml = getMessagesHtml;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+      console.log('here!');
+      getStats(1, true);
+      getStats(3);
+      getStats(5);
+      getStats(7);
+      getStats(14);
+      getStats(30);
+    }
+
+    function getStats(numDays, isOpen) {
+      isOpen = isOpen || false;
+      // build query strings as needed
+      Stats.getStats({ numDays: numDays }).then(function (stats) {
+        console.log('stats', stats);
+        vm.mostPoints[numDays] = stats.data;
+        vm.mostPoints[numDays].isOpen = isOpen;
+        addMessages(vm.mostPoints[numDays].dongs, 'dongs');
+        addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
+        console.log(vm.mostPoints);
+      }).catch(function (err) {
+        console.log('err', err);
+      });
+    }
+
+    function addMessages(points, type) {
+      points.forEach(function (point) {
+        point.messages = getMessagesHtml(point[type]);
+      });
+    }
+
+    function getMessagesHtml(pointArray) {
+      var hasMsg = false;
+      var html = '<ul style=" padding-left:5px;">';
+      console.log('pointArray', pointArray);
+      pointArray.forEach(function (element) {
+        if (element.message) {
+          hasMsg = true;
+          html += '<li>' + element.message + '</li>';
+        }
+      });
+      html += '</ul>';
+      console.log(html);
+      if (hasMsg) {
+        return $sce.trustAsHtml(html);
+      } else {
+        return false;
+      }
     }
   }
 })();

@@ -14,6 +14,7 @@
     vm.rockstars = [];
     vm.recent = [];
     vm.pointType = 'dong';
+    vm.message = null;
     vm.show = {
       recentActivity: true,
       givePoint: true,
@@ -89,13 +90,14 @@
     /**
      * ADD user point
      */
-    function createUserPoint(toUser, pointType) {
+    function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
         setMsg({msg: 'You must select a user'}, true);
       } else {
         var data = {
           pointType: pointType,
-          toUser: toUser
+          toUser: toUser,
+          message: message
         };
         Point.createPoint(data)
         .then(function(userPoints) {
@@ -107,6 +109,7 @@
           getUsersPoints();
           setMsg(userPoints.data, false);
           vm.user = null;
+          vm.message = null;
         })
         .catch(function(response){
           setMsg(response.data, true);
@@ -151,6 +154,7 @@
       // update recent obj
       Point.getUserVotes()
       .then(function(recent) {
+
         enrichRecent(recent.data.userVotes);
         vm.recent = recent.data.userVotes;
       })

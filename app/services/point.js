@@ -4,25 +4,25 @@ angular.module('app.services')
       getUsersPoints: function(query) {
         var options = {};
         options.query = query;
-        return $http.get('/userPoints', options);
+        return $http.get('/api/userPoints', options);
       },
       getUserPoints: function(id, query) {
         var options = {};
         options.query = query;
-        return $http.get('/userPoints/'+id, options);
+        return $http.get('/api/userPoints/'+id, options);
       },
       getUserVotes: function(id, query) {
         var options = {};
         options.query = query;
-        return $http.get('/userVotes', options);
+        return $http.get('/api/userVotes', options);
       },
       createPoint: function(data) {
-        return $http.post('/point', data);
+        return $http.post('/api/point', data);
       },
       removePoint: function(toUser, pointType, query) {
         var options = {};
         options.query = query || {};
-        return $http.delete('/point/'+toUser+'/'+pointType, options);
+        return $http.delete('/api/point/'+toUser+'/'+pointType, options);
       }
     };
   });

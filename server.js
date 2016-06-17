@@ -18,11 +18,11 @@ var favicon = require('serve-favicon');
 dotenv.load();
 
 // Models
-var User = require('./models/user');
+var User = require('./app_server/models/user');
 
-// Controllers
-var UserController = require('./controllers/user');
-var PointController = require('./controllers/point');
+// Routes
+var routes = require('./app_server/routes');
+
 
 var app = express();
 
@@ -70,19 +70,7 @@ app.use(function(req, res, next) {
   }
 });
 
-app.put('/account', UserController.ensureAuthenticated, UserController.accountPut);
-app.delete('/account', UserController.ensureAuthenticated, UserController.accountDelete);
-app.post('/signup', UserController.signupPost);
-app.post('/activate/:token', UserController.activateAccount);
-app.post('/login', UserController.loginPost);
-app.post('/forgot', UserController.forgotPost);
-app.post('/reset/:token', UserController.resetPost);
-app.get('/users', UserController.getUsers);
-app.get('/userPoints', PointController.getUsersPoints);
-app.get('/userVotes', PointController.getUserVotes);
-app.get('/userPoints/:id', PointController.getUserPoints);
-app.post('/point', PointController.createUserPoint);
-app.delete('/point/:toUser/:pointType', PointController.removeUserPoint);
+app.use('/api', routes);
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'app', 'index.html'));
@@ -106,7 +94,7 @@ var server = app.listen(app.get('port'), function() {
 
 var io = require('socket.io').listen(server);
 io.sockets.loggedIn = {}; // initialize user object
-var socketHandler = require('./services/socket-server');
+var socketHandler = require('./app_server/services/socket-server');
 socketHandler.io(io); // pass in io so it is available in socketController
 io.sockets.on('connection', socketHandler.socketController);
 

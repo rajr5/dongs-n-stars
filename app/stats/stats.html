@@ -1,0 +1,64 @@
+<div class="container-fluid">
+  <h1>Dongs N Stars Champion Board</h1>
+    <uib-accordion close-others="false">
+    <div ng-repeat="(key, value) in vm.mostPoints">
+      <uib-accordion-group is-open="value.isOpen">
+        <uib-accordion-heading>
+          Last {{key}} Days <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': value.isOpen, 'glyphicon-chevron-right': !value.isOpen}"></i>
+        </uib-accordion-heading>
+        <div class="column">
+          <div class="col-md-6 col-sm-12">
+
+            <ul class="list-item-group">
+              <h2 class="center-block"><small class="text-danger">Dong Miesters</small></h2>
+              <li
+                ng-repeat="entry in value.dongs | orderBy: '-dongs.length'"
+                class="list-group-item">
+                <span
+                  class="badge"
+                  uib-popover-html="entry.messages"
+                  popover-trigger="mouseenter click"
+                  popover-placement="bottom-right"
+                  popover-enable="entry.messages"
+                  popover-title="Messages">
+                {{entry.dongs.length}}</span>
+                <span
+                  uib-tooltip="{{entry.user.email}}"
+                  tooltip-placement="bottom"
+                  tooltip-popup-delay="200">
+                  {{entry.user.name}}
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6 col-sm-12">
+
+            <ul class="list-item-group">
+              <h2 class="center-block"><small class="text-success">Rockstars</small></h2>
+              <li
+                ng-repeat="entry in value.rockstars | orderBy: '-rockstars.length'"
+                class="list-group-item">
+                <span
+                  class="badge"
+                  uib-popover-html="entry.messages"
+                  popover-trigger="mouseenter click"
+                  popover-placement="bottom-right"
+                  popover-enable="entry.messages"
+                  popover-title="Messages">
+                    {{entry.rockstars.length}}
+                </span>
+                <span
+                  uib-tooltip="{{entry.user.email}}"
+                  tooltip-placement="bottom"
+                  tooltip-popup-delay="200">
+                  {{entry.user.name}}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </uib-accordion-group>
+      </uib-accordion>
+    </div>
+</div>
+
