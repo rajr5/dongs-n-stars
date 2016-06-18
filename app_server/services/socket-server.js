@@ -88,4 +88,9 @@ module.exports.socketController = (socket) => {
       userVote: userVote
     });
   });
+
+  socket.on('point:messageVote', (userVote) => {
+    console.log('point:messageVote received');
+    socket.broadcast.emit('point:newMessageVote', userVote);
+  });
 };

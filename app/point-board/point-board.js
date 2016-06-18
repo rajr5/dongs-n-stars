@@ -26,6 +26,7 @@
     vm.setPointType = setPointType;
     vm.getUsersPoints = getUsersPoints;
     vm.createUserPoint = createUserPoint;
+    vm.messageVote = messageVote;
     vm.removeUserPoint = removeUserPoint;
     vm.selectUser = selectUser;
     vm.toggleShow = toggleShow;
@@ -116,6 +117,31 @@
           vm.user = null;
         });
       }
+    }
+
+
+    function messageVote(userVote, voteType) {
+      Point.messageVote(userVote._id, voteType)
+      .then(function(response) {
+        // set user vote object with change
+        setUserVote(response.data, userVote, voteType);
+        // emit change
+        notifyMessageVote(userVote, voteType);
+      })
+      .catch(function(err) {
+
+      });
+    }
+
+    /**
+     * Helper function to set user vote and 
+     * have the change event fire
+     */
+    function setUserVote(src, target, voteType) {
+      target.downvote = src.downvote;
+      target.upvote = src.upvote;
+      target[voteType+'Changed'] = true;
+      setToFalse(target, voteType+'Changed', 2000);
     }
 
     /**
@@ -233,6 +259,10 @@
       Socket.emit('user:newUserLoggedIn', loggedInUser);
     }
 
+    function notifyMessageVote(userVote, voteType) {
+      Socket.emit('point:messageVote', {userVote: userVote, coteType: voteType});
+    }
+
     function setToFalse(obj, prop, delay) {
       return $timeout(()=>{
         obj[prop] = false;
@@ -270,6 +300,20 @@
     Socket.on('user:userDetailReq', function(data, cb) {
       cb(vm.currentUser);
       Socket.emit('user:userDetailRes', vm.currentUser);
+    });
+
+    /**
+     * Someone upvoted or downvoted
+     */
+    Socket.on('point:newMessageVote', function(messageVote) {
+      // loop through all recent and find userVote
+      vm.recent.forEach(function(currVote) {
+        if (currVote._id === messageVote.userVote._id) {
+          // Set the userVote item to match the up/downvotes
+          setUserVote(messageVote.userVote, currVote, messageVote.voteType);
+          return;
+        }
+      }, this);
     });
 
     // A new user logged in, update logged in user list

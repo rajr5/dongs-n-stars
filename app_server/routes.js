@@ -21,12 +21,16 @@
   router.post('/forgot', UserController.forgotPost);
   router.post('/reset/:token', UserController.resetPost);
   router.get('/users', UserController.getUsers);
+  
   router.get('/userPoints', PointController.getUsersPoints);
   router.get('/userVotes', PointController.getUserVotes);
   router.get('/userPoints/:id', PointController.getUserPoints);
   router.post('/point', PointController.createUserPoint);
+  router.put('/userVotes/:userVoteId/:voteType', PointController.messageVote);
   router.delete('/point/:toUser/:pointType', PointController.removeUserPoint);
+  
   router.get('/stats', StatController.getStats);
+  
 
   module.exports = router;
 

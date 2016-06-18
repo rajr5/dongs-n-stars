@@ -125,16 +125,33 @@
                       <span ng-show="recent.dong !== 0"> point</span>
                       <span ng-show="recent.rockstar !== 0"> nomination</span>
                       </span>
-                      <span
-                        uib-popover="{{recent.message}}"
-                        popover-trigger="mouseenter click"
-                        popover-placement="bottom-right"
-                        popover-popup-close-delay="500"
-                        popover-title="Message"
-                        class="glyphicon glyphicon-comment text-primary pull-right"
-                        style="padding-right: 10px"
-                        ng-show="recent.message"
-                        aria-hidden="true">
+                      <span class="pull-right" ng-show="recent.message">
+                        <span ng-class="{'text-success': true, 'label label-info': recent.upvoteChanged}">
+                          <span
+                            ng-click="vm.messageVote(recent, 'upvote')"
+                            class="glyphicon glyphicon-thumbs-up"
+                            aria-hidden="true">
+                          </span>
+                          {{recent.upvote || 0}}
+                        </span>
+                        <span ng-class="{'text-danger': true, 'label label-info': recent.downvoteChanged}">
+                          <span
+                            ng-click="vm.messageVote(recent, 'downvote')"
+                            class="glyphicon glyphicon-thumbs-down"
+                            aria-hidden="true">
+                          </span>
+                          {{recent.downvote || 0}}
+                        </span>
+                        <span
+                          uib-popover="{{recent.message}}"
+                          popover-trigger="mouseenter click"
+                          popover-placement="bottom-right"
+                          popover-popup-close-delay="500"
+                          popover-title="Message"
+                          class="glyphicon glyphicon-comment text-primary"
+                          style="padding-right: 10px"
+                          aria-hidden="true">
+                        </span>
                       </span>
                     </div>
                   </li>

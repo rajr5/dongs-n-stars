@@ -2,6 +2,7 @@ var User = require('../models/user');
 var Point = require('../models/point');
 var UserPoint = require('../models/userPoint');
 var UserVote = require('../models/userVote');
+var PointService = require('../services/pointService');
 
 MAX_VOTES = 5;
 
@@ -122,6 +123,19 @@ exports.createUserPoint = function(req, res) {
           return sendJson(res, 400, {msg: 'Could not save ' + pointType, error: err});
         }
         userVote.save((err) => {
+          // save userVote id to userPoint
+          // CONSIDER SAVING USERVOTE FIRST? SOME WAY TO CLEAN THIS UP
+          ///////////////////////
+          var lastIdx = userPoint[pluralPointType].length-1;
+          userPoint[pluralPointType][lastIdx].userVote = userVote._id;
+          // letting run async, no need to hold user up for this save
+          userPoint.save((err) => {
+            if (err) {
+              console.log('could not save userVote id to userpoint');
+            }
+          });
+          ////////////////////////
+
           UserVote.findById(userVote._id)
           .populate('fromUser toUser')
           .exec((err, userVote) => {
@@ -137,6 +151,30 @@ exports.createUserPoint = function(req, res) {
   });
 };
 
+/**
+ *  PUT /:userVoteId/:voteType
+ */
+exports.messageVote = function(req, res) {
+  req.checkParams('userVoteId', 'userVote id must be a valid db id').isMongoId();
+  req.checkParams('voteType', 'vote type must be either \'upvote\' or \'downvote\'').isIn(['upvote', 'downvote']);
+
+  var errors = req.validationErrors();
+
+  if (errors) {
+    return sendJson(res, 400, errors);
+  }
+  
+  var userVoteId = req.params.userVoteId;
+  var isUpVote = req.params.voteType === 'upvote' ? true : false; 
+  
+  PointService.messageVoteHelper(userVoteId, isUpVote)
+  .then((data) => {
+    sendJson(res, 200, data);
+  })
+  .catch((err) => {
+    sendJson(res, 400, err);
+  });
+};
 
 
 /**
