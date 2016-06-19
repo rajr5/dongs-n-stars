@@ -13,6 +13,8 @@ var pointSchema = new mongoose.Schema({
   message: String,
   upvote: { type: Number, default: 0 },
   downvote: { type: Number, default: 0 },
+  upvoteUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+  downvoteUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
   isDeleted: { type: Boolean, default: false},
 }, schemaOptions);
 

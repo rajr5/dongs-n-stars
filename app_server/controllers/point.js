@@ -167,7 +167,7 @@ exports.messageVote = function(req, res) {
   var userVoteId = req.params.userVoteId;
   var isUpVote = req.params.voteType === 'upvote' ? true : false; 
   
-  PointService.messageVoteHelper(userVoteId, isUpVote)
+  PointService.messageVoteHelper(userVoteId, isUpVote, req.user._id)
   .then((data) => {
     sendJson(res, 200, data);
   })

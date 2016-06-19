@@ -13,6 +13,7 @@
     vm.dongs = [];
     vm.rockstars = [];
     vm.recent = [];
+    vm.recentMessage = null;
     vm.pointType = 'dong';
     vm.message = null;
     vm.show = {
@@ -129,7 +130,7 @@
         notifyMessageVote(userVote, voteType);
       })
       .catch(function(err) {
-
+        setMsg(err.data, true);
       });
     }
 
