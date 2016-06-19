@@ -5,8 +5,8 @@
       .module('app.user')
       .controller('ProfileController', ProfileController);
 
-    ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account',];
-    function ProfileController($rootScope, $location, $window, $auth, Account) {
+    ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast'];
+    function ProfileController($rootScope, $location, $window, $auth, Account, Toast) {
       var vm = this;
       vm.profile = $rootScope.currentUser;
       vm.updateProfile = updateProfile;
@@ -19,6 +19,13 @@
 
       function activate() {
         delete vm.profile.password;
+        // Modal.open('small', 'my title', 'some content')
+        // .then(function(data){
+        //   console.log('data', data);
+        // })
+        // .catch(function(data){
+        //   console.log('data', data);
+        // });
       }
 
     function updateProfile() {
@@ -27,14 +34,10 @@
         .then(function(response) {
           $rootScope.currentUser = response.data.user;
           $window.localStorage.user = JSON.stringify(response.data.user);
-          vm.messages = {
-            success: [response.data]
-          };
+          Toast.show('success', 'Success', response.data);
         })
         .catch(function(response) {
-          vm.messages = {
-            error: Array.isArray(response.data) ? response.data : [response.data]
-          };
+          Toast.show('error', 'Error', response.data);
         });
     }
 
@@ -43,18 +46,13 @@
       vm.profile.confirm = confirm || null;
       Account.changePassword(vm.profile)
         .then(function(response) {
-          console.log('response', response);
-          vm.messages = {
-            success: [response.data]
-          };
+          Toast.show('success', 'Success', response.data);
+
           delete vm.password;
           delete vm.confirm;
         })
         .catch(function(response) {
-          console.log('response', response);
-          vm.messages = {
-            error: Array.isArray(response.data) ? response.data : [response.data]
-          };
+          Toast.show('error', 'Error', response.data);
         });
     }
 
@@ -64,11 +62,10 @@
           $auth.logout();
           delete $window.localStorage.user;
           $location.path('/');
+          Toast.show('warning', 'Success', 'Account was successfully deleted');
         })
         .catch(function(response) {
-          vm.messages = {
-            error: [response.data]
-          };
+          Toast.show('error', 'Error', response.data);
         });
     }
 

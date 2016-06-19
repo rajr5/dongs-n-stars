@@ -10,7 +10,14 @@
   'ngAnimate', 'ngTouch',
 
   /** 3rd Party Modules */
-  'ui.bootstrap']);
+  'ui.bootstrap', 'toaster']);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.auth', []);
 })();
 'use strict';
 
@@ -66,7 +73,132 @@
 (function () {
   'use strict';
 
-  angular.module('app.auth', []);
+  angular.module('app.auth').controller('ActivateController', ActivateController);
+
+  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Socket', 'Toast'];
+  function ActivateController($rootScope, $location, $window, $auth, Account, Socket, Toast) {
+    var vm = this;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+      activateAccount();
+    }
+
+    function activateAccount() {
+      var token = $location.search().token;
+      Account.activateAccount(token).then(function (response) {
+        Socket.emit('users:newAccountActivated');
+        $auth.setToken(response);
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/pointBoard');
+      }).catch(function (response) {
+        Toast.show('error', 'Error', response.error || response.data);
+      });
+    }
+  }
+})();
+'use strict';
+
+angular.module('app.auth').controller('ForgotCtrl', ["$scope", "Account", "Toast", function ($scope, Account, Toast) {
+  $scope.forgotPassword = function () {
+    Account.forgotPassword($scope.user).then(function (response) {
+      Toast.show('success', 'Success', response.data);
+    }).catch(function (response) {
+      Toast.show('error', 'Error', response.data);
+    });
+  };
+}]);
+'use strict';
+
+angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$location", "$window", "$auth", "Toast", function ($scope, $rootScope, $location, $window, $auth, Toast) {
+  $scope.login = function () {
+    $auth.login($scope.user).then(function (response) {
+      $rootScope.currentUser = response.data.user;
+      $window.localStorage.user = JSON.stringify(response.data.user);
+      $location.path('/pointBoard');
+    }).catch(function (response) {
+      Toast.show('error', 'Error', response.data);
+    });
+  };
+
+  $scope.authenticate = function (provider) {
+    $auth.authenticate(provider).then(function (response) {
+      $rootScope.currentUser = response.data.user;
+      $window.localStorage.user = JSON.stringify(response.data.user);
+      $location.path('/pointBoard');
+    }).catch(function (response) {
+      Toast.show('error', 'Error', response.error || response.data);
+    });
+  };
+}]);
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.auth').controller('ResetController', ResetController);
+
+  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast'];
+  function ResetController($rootScope, $location, $window, $auth, Account, Toast) {
+    var vm = this;
+
+    vm.resetPassword = resetPassword;
+
+    activate();
+
+    ////////////////
+
+    function activate() {}
+
+    function resetPassword() {
+      var token = $location.search().token;
+      Account.resetPassword(token, vm.user).then(function (response) {
+        $auth.setToken(response);
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/');
+      }).catch(function (response) {
+        Toast.show('error', 'Error', response.data);
+      });
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.auth').controller('SignupController', SignupController);
+
+  SignupController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Toast'];
+  function SignupController($rootScope, $location, $window, $auth, Toast) {
+    var vm = this;
+
+    vm.buttonDisable = false;
+    vm.signup = signup;
+
+    activate();
+
+    ////////////////
+
+    function activate() {}
+
+    function signup() {
+      vm.buttonDisable = true;
+      $auth.signup(vm.user).then(function (response) {
+        vm.user = null;
+        $location.path('/login');
+        Toast.show('success', 'Success', response.data);
+      }).catch(function (response) {
+        Toast.show('error', 'Error', response.data);
+        vm.buttonDisable = false;
+      });
+    }
+  }
 })();
 'use strict';
 
@@ -193,8 +325,8 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 
   angular.module('app.point-board').controller('PointController', PointController);
 
-  PointController.$inject = ['$scope', '$timeout', '$q', 'Point', 'Account', 'Socket'];
-  function PointController($scope, $timeout, $q, Point, Account, Socket) {
+  PointController.$inject = ['$scope', '$timeout', '$q', 'Point', 'Account', 'Socket', 'Toast'];
+  function PointController($scope, $timeout, $q, Point, Account, Socket, Toast) {
     var vm = this;
 
     vm.userPoints = null;
@@ -238,7 +370,8 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         vm.userPoints = userPoints.data.userPoints;
         setPoints();
       }).catch(function (response) {
-        setMsg(response.data, true);
+        Toast.show('error', 'Error', response.data);
+        // setMsg(response.data, true);
       });
     }
 
@@ -247,7 +380,8 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         vm.users = users.data;
         getLoggedInUsers();
       }).catch(function (response) {
-        setMsg(response.data, true);
+        // Toast.show('error', 'Error', response.data);
+        // setMsg(response.data, true);
       });
     }
 
@@ -276,7 +410,8 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
      */
     function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
-        setMsg({ msg: 'You must select a user' }, true);
+        // setMsg({msg: 'You must select a user'}, true);
+        Toast.show('error', 'Error', { msg: 'You must select a user' });
       } else {
         var data = {
           pointType: pointType,
@@ -290,11 +425,13 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
           notifyPoint(userPoints.data.userVote);
           // Update userpoint list
           getUsersPoints();
-          setMsg(userPoints.data, false);
+          Toast.show('success', 'Success', userPoints.data);
+          // setMsg(userPoints.data, false);
           vm.user = null;
           vm.message = null;
         }).catch(function (response) {
-          setMsg(response.data, true);
+          Toast.show('error', 'Error', response.data);
+          // setMsg(response.data, true);
           vm.user = null;
         });
       }
@@ -306,8 +443,9 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         setUserVote(response.data, userVote, voteType);
         // emit change
         notifyMessageVote(userVote, voteType);
-      }).catch(function (err) {
-        setMsg(err.data, true);
+      }).catch(function (response) {
+        // setMsg(response.data, true);
+        Toast.show('error', 'Error', response.data);
       });
     }
 
@@ -337,9 +475,11 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         notifyPoint(userPoints.data.userVote);
         // update dong/rockstar
         getUsersPoints();
-        setMsg(userPoints.data, false);
+        // setMsg(userPoints.data, false);
+        Toast.show('success', 'Success', userPoints.data);
       }).catch(function (response) {
-        setMsg(response.data, true);
+        // setMsg(response.data, true);
+        Toast.show('error', 'Error', response.data);
       });
     }
 
@@ -460,6 +600,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
       userVote.userVote.successClass = true;
       setToFalse(userVote.userVote, 'successClass', 5000);
       vm.recent.push(userVote.userVote);
+      Toast.show('note', 'Point Given', 'Another user added/removed a point');
       // update board with point change
       getUsersPoints();
     });
@@ -482,6 +623,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         if (currVote._id === messageVote.userVote._id) {
           // Set the userVote item to match the up/downvotes
           setUserVote(messageVote.userVote, currVote, messageVote.voteType);
+          Toast.show('note', 'New Message Vote', 'Another user voted on a message');
           return;
         }
       }, this);
@@ -494,6 +636,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 
     // Update user list if a new user registers
     Socket.on('users:newAccount', function (obj) {
+      Toast.show('note', 'New User', 'New user registered, list updated');
       getUsers();
     });
 
@@ -654,12 +797,56 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 'use strict';
 
 (function () {
+    'use strict';
+
+    angular.module('app.services').factory('Toast', ToasterService);
+
+    ToasterService.$inject = ['toaster'];
+    function ToasterService(toaster) {
+        var service = {
+            show: show
+        };
+
+        return service;
+
+        ////////////////
+        function show(type, title, messages) {
+            /**
+             * Format for error messages, only msg param is used.
+             * Can also just pass in object with msg field without being wrapped in array
+             * @param body = [{ param: 'urlparam', msg: 'Invalid urlparam', value: 't1est' } ]]
+             */
+            type = type || 'success';
+            // Ensure valid type
+            if (!['success', 'warning', 'error', 'wait', 'note'].includes(type)) {
+                type = 'success';
+            }
+            if (!Array.isArray(messages)) {
+                messages = [messages];
+            }
+            var text = '';
+            messages.map(function (msg) {
+                text += '<ul style="list-style: none; padding-left:0;">';
+                if (msg.msg) {
+                    text += '<li>' + msg.msg + '</li>';
+                } else if (typeof msg === 'string') {
+                    text += '<li>' + msg + '</li>';
+                }
+                text += '</ul>';
+            });
+            toaster.pop(type, title, text, null, 'trustedHtml');
+        }
+    }
+})();
+'use strict';
+
+(function () {
   'use strict';
 
   angular.module('app.stats').controller('StatsController', StatsController);
 
-  StatsController.$inject = ['$sce', 'Stats'];
-  function StatsController($sce, Stats) {
+  StatsController.$inject = ['$sce', 'Stats', 'Toast'];
+  function StatsController($sce, Stats, Toast) {
     var vm = this;
 
     // 7: {
@@ -694,8 +881,8 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
         vm.mostPoints[numDays].isOpen = isOpen;
         addMessages(vm.mostPoints[numDays].dongs, 'dongs');
         addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
-      }).catch(function (err) {
-        console.log('err', err);
+      }).catch(function (response) {
+        Toast.show('error', 'Error', response.data);
       });
     }
 
@@ -730,8 +917,8 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 
   angular.module('app.user').controller('ProfileController', ProfileController);
 
-  ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
-  function ProfileController($rootScope, $location, $window, $auth, Account) {
+  ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast'];
+  function ProfileController($rootScope, $location, $window, $auth, Account, Toast) {
     var vm = this;
     vm.profile = $rootScope.currentUser;
     vm.updateProfile = updateProfile;
@@ -744,6 +931,13 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 
     function activate() {
       delete vm.profile.password;
+      // Modal.open('small', 'my title', 'some content')
+      // .then(function(data){
+      //   console.log('data', data);
+      // })
+      // .catch(function(data){
+      //   console.log('data', data);
+      // });
     }
 
     function updateProfile() {
@@ -751,13 +945,9 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
       Account.updateProfile(vm.profile).then(function (response) {
         $rootScope.currentUser = response.data.user;
         $window.localStorage.user = JSON.stringify(response.data.user);
-        vm.messages = {
-          success: [response.data]
-        };
+        Toast.show('success', 'Success', response.data);
       }).catch(function (response) {
-        vm.messages = {
-          error: Array.isArray(response.data) ? response.data : [response.data]
-        };
+        Toast.show('error', 'Error', response.data);
       });
     }
 
@@ -765,17 +955,12 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
       vm.profile.password = password || null;
       vm.profile.confirm = confirm || null;
       Account.changePassword(vm.profile).then(function (response) {
-        console.log('response', response);
-        vm.messages = {
-          success: [response.data]
-        };
+        Toast.show('success', 'Success', response.data);
+
         delete vm.password;
         delete vm.confirm;
       }).catch(function (response) {
-        console.log('response', response);
-        vm.messages = {
-          error: Array.isArray(response.data) ? response.data : [response.data]
-        };
+        Toast.show('error', 'Error', response.data);
       });
     }
 
@@ -784,167 +969,77 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
         $auth.logout();
         delete $window.localStorage.user;
         $location.path('/');
+        Toast.show('warning', 'Success', 'Account was successfully deleted');
       }).catch(function (response) {
-        vm.messages = {
-          error: [response.data]
-        };
+        Toast.show('error', 'Error', response.data);
       });
     }
   }
 })();
-'use strict';
+// (function() {
+// 'use strict';
 
-(function () {
-  'use strict';
+//     angular
+//         .module('app.config')
+//         .controller('ModalController', ModalController);
 
-  angular.module('app.auth').controller('ActivateController', ActivateController);
+//     ModalController.$inject = ['$uibModalInstance', 'title', 'content'];
+//     function ModalController($uibModalInstance) {
+//         var vm = this;
+//         vm.title = title;
+//         vm.content = content;
 
-  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Socket'];
-  function ActivateController($rootScope, $location, $window, $auth, Account, Socket) {
-    var vm = this;
+//         activate();
 
-    activate();
+//         ////////////////
 
-    ////////////////
+//         function activate() {
 
-    function activate() {
-      activateAccount();
-    }
+//         }
 
-    function activateAccount() {
-      var token = $location.search().token;
-      Account.activateAccount(token).then(function (response) {
-        Socket.emit('users:newAccountActivated');
-        $auth.setToken(response);
-        $rootScope.currentUser = response.data.user;
-        $window.localStorage.user = JSON.stringify(response.data.user);
-        $location.path('/');
-      }).catch(function (err) {
-        if (err.error) {
-          vm.messages = {
-            error: [{ msg: err.error }]
-          };
-        } else if (err.data) {
-          vm.messages = {
-            error: [err.data]
-          };
-        }
-      });
-    }
-  }
-})();
-'use strict';
+//         function ok() {
+//           $uibModalInstance.close('ok');
+//         }
 
-angular.module('app.auth').controller('ForgotCtrl', ["$scope", "Account", function ($scope, Account) {
-  $scope.forgotPassword = function () {
-    Account.forgotPassword($scope.user).then(function (response) {
-      $scope.messages = {
-        success: [response.data]
-      };
-    }).catch(function (response) {
-      $scope.messages = {
-        error: Array.isArray(response.data) ? response.data : [response.data]
-      };
-    });
-  };
-}]);
-'use strict';
+//         function cancel() {
+//           $uibModalInstance.dismiss('cancel');
+//         }
+//     }
+// })();
+"use strict";
+// (function() {
+// 'use strict';
 
-angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$location", "$window", "$auth", function ($scope, $rootScope, $location, $window, $auth) {
-  $scope.login = function () {
-    $auth.login($scope.user).then(function (response) {
-      $rootScope.currentUser = response.data.user;
-      $window.localStorage.user = JSON.stringify(response.data.user);
-      $location.path('/pointBoard');
-    }).catch(function (response) {
-      $scope.messages = {
-        error: Array.isArray(response.data) ? response.data : [response.data]
-      };
-    });
-  };
+//     angular
+//         .module('app.config')
+//         .factory('Modal', Modal);
 
-  $scope.authenticate = function (provider) {
-    $auth.authenticate(provider).then(function (response) {
-      $rootScope.currentUser = response.data.user;
-      $window.localStorage.user = JSON.stringify(response.data.user);
-      $location.path('/pointBoard');
-    }).catch(function (response) {
-      if (response.error) {
-        $scope.messages = {
-          error: [{ msg: response.error }]
-        };
-      } else if (response.data) {
-        $scope.messages = {
-          error: [response.data]
-        };
-      }
-    });
-  };
-}]);
-'use strict';
+//     Modal.$inject = ['$uibModal'];
+//     function Modal($uibModal) {
+//         var service = {
+//             open:open
+//         };
 
-(function () {
-  'use strict';
+//         return service;
 
-  angular.module('app.auth').controller('ResetController', ResetController);
-
-  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
-  function ResetController($rootScope, $location, $window, $auth, Account) {
-    var vm = this;
-
-    vm.resetPassword = resetPassword;
-
-    activate();
-
-    ////////////////
-
-    function activate() {}
-
-    function resetPassword() {
-      var token = $location.search().token;
-      Account.resetPassword(token, vm.user).then(function (response) {
-        $auth.setToken(response);
-        $rootScope.currentUser = response.data.user;
-        $window.localStorage.user = JSON.stringify(response.data.user);
-        $location.path('/');
-      }).catch(function (err) {
-        vm.messages = {
-          error: Array.isArray(err.data) ? err.data : [err.data]
-        };
-      });
-    }
-  }
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.auth').controller('SignupController', SignupController);
-
-  SignupController.$inject = ['$rootScope', '$location', '$window', '$auth'];
-  function SignupController($rootScope, $location, $window, $auth) {
-    var vm = this;
-
-    vm.signup = signup;
-
-    activate();
-
-    ////////////////
-
-    function activate() {}
-
-    function signup() {
-      $auth.signup(vm.user).then(function (response) {
-        vm.user = null;
-        vm.messages = {
-          success: Array.isArray(response.data) ? response.data : [response.data]
-        };
-      }).catch(function (response) {
-        vm.messages = {
-          error: Array.isArray(response.data) ? response.data : [response.data]
-        };
-      });
-    }
-  }
-})();
+//         ////////////////
+//         function open(size, title, content) {
+//           return $uibModal.open({
+//             animation: true,
+//             templateUrl: '/config/modal/modal.html',
+//             controller: 'ModalController',
+//             controllerAs: 'vm',
+//             size: size,
+//             resolve: {
+//               title: function () {
+//                 return title;
+//               },
+//               content: function() {
+//                 return content;
+//               }
+//             }
+//           });
+//         }
+//     }
+// })();
+"use strict";

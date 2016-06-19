@@ -57,7 +57,7 @@ exports.getUsers = function(req, res) {
     {$and: [
       {$or: [{active: true},{active: undefined}]},
       {_id: {$ne: req.user._id}}]})
-  .select('_id name email')
+  .select('_id name email location')
   .exec((err, users) => {
     if (err) {
       sendJson(res, 401, {msg: "Could not retreive users", error: err});
@@ -227,6 +227,7 @@ exports.accountPut = function(req, res, next) {
     } else {
       user.email = req.body.email;
       user.name = req.body.name;
+      user.location = req.body.location;
     }
     user.save((err) => {
       if ('password' in req.body) {

@@ -79,14 +79,6 @@
               <!--list group-->
             </div>
             </div>
-              <div class="row" style="min-height:30px">
-                <div ng-show="vm.messages.error && vm.messages.error.length > 0" role="alert" class="alert alert-danger">
-                  <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
-                </div>
-                <div ng-show="vm.messages.success && vm.messages.success.length > 0" role="alert" class="alert alert-success">
-                  <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
-                </div>
-              </div>
          </div>
          <!---------------------------- RECENT ACTIVITY -------------------->
           <div class="col-md-6">
@@ -110,7 +102,7 @@
               <div
                 class="panel-body"
                 ng-show="vm.show.recentActivity"
-                style="height: 437px; overflow-y: scroll; overflow-x: none;">
+                style="height: 510px; overflow-y: scroll; overflow-x: none;">
                 <ul class="list-group">
                   <li class="list-group-item"
                       ng-repeat="recent in vm.recent | orderBy: '-voteDate' track by $index"
@@ -183,12 +175,6 @@
             </div>
         </div>
         <div class="panel-body" ng-show="vm.show.dong">
-          <div ng-if="messages.error" role="alert" class="alert alert-danger">
-            <div ng-repeat="error in messages.error">{{error.msg}}</div>
-          </div>
-          <div ng-if="messages.success" role="alert" class="alert alert-success">
-            <div ng-repeat="success in messages.success">{{success.msg}}</div>
-          </div>
           <div class="table-responsive">
             <table class="table table-striped">
               <thead>
