@@ -11,7 +11,11 @@ var userVoteSchema = new mongoose.Schema({
   dong: { type: Number, default : 0 },
   rockstar: { type: Number, default : 0 },
   voteDate: { type: Date, default: Date.now },
-  message: { type: String }
+  message: { type: String },
+  upvote: { type: Number, default: 0 },
+  downvote: { type: Number, default: 0 },
+  upvoteUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+  downvoteUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
 }, schemaOptions);
 
 var UserVote = mongoose.model('UserVote', userVoteSchema);

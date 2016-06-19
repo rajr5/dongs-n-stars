@@ -9,7 +9,12 @@ var pointSchema = new mongoose.Schema({
   fromUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   added: { type: Date, default: Date.now},
   deleted: Date,
+  userVote: { type: mongoose.Schema.Types.ObjectId, ref: 'UserVote' },
   message: String,
+  upvote: { type: Number, default: 0 },
+  downvote: { type: Number, default: 0 },
+  upvoteUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+  downvoteUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
   isDeleted: { type: Boolean, default: false},
 }, schemaOptions);
 

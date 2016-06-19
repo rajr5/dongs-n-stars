@@ -19,6 +19,9 @@ angular.module('app.services')
       createPoint: function(data) {
         return $http.post('/api/point', data);
       },
+      messageVote: function(userVoteId, voteType) {
+        return $http.put('/api/userVotes/'+userVoteId+'/'+voteType);
+      },
       removePoint: function(toUser, pointType, query) {
         var options = {};
         options.query = query || {};

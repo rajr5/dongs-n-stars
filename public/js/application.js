@@ -17,21 +17,7 @@
 (function () {
   'use strict';
 
-  angular.module('app.auth', []);
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
   angular.module('app.config', ['ngRoute', 'satellizer']);
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.point-board', []);
 })();
 'use strict';
 
@@ -46,6 +32,13 @@
   'use strict';
 
   angular.module('app.templates', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.point-board', []);
 })();
 'use strict';
 
@@ -73,156 +66,7 @@
 (function () {
   'use strict';
 
-  angular.module('app.auth').controller('ActivateController', ActivateController);
-
-  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Socket'];
-  function ActivateController($rootScope, $location, $window, $auth, Account, Socket) {
-    var vm = this;
-
-    activate();
-
-    ////////////////
-
-    function activate() {
-      activateAccount();
-    }
-
-    function activateAccount() {
-      var token = $location.search().token;
-      Account.activateAccount(token).then(function (response) {
-        Socket.emit('users:newAccountActivated');
-        $auth.setToken(response);
-        $rootScope.currentUser = response.data.user;
-        $window.localStorage.user = JSON.stringify(response.data.user);
-        $location.path('/');
-      }).catch(function (err) {
-        if (err.error) {
-          vm.messages = {
-            error: [{ msg: err.error }]
-          };
-        } else if (err.data) {
-          vm.messages = {
-            error: [err.data]
-          };
-        }
-      });
-    }
-  }
-})();
-'use strict';
-
-angular.module('app.auth').controller('ForgotCtrl', ["$scope", "Account", function ($scope, Account) {
-  $scope.forgotPassword = function () {
-    Account.forgotPassword($scope.user).then(function (response) {
-      $scope.messages = {
-        success: [response.data]
-      };
-    }).catch(function (response) {
-      $scope.messages = {
-        error: Array.isArray(response.data) ? response.data : [response.data]
-      };
-    });
-  };
-}]);
-'use strict';
-
-angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$location", "$window", "$auth", function ($scope, $rootScope, $location, $window, $auth) {
-  $scope.login = function () {
-    $auth.login($scope.user).then(function (response) {
-      $rootScope.currentUser = response.data.user;
-      $window.localStorage.user = JSON.stringify(response.data.user);
-      $location.path('/pointBoard');
-    }).catch(function (response) {
-      $scope.messages = {
-        error: Array.isArray(response.data) ? response.data : [response.data]
-      };
-    });
-  };
-
-  $scope.authenticate = function (provider) {
-    $auth.authenticate(provider).then(function (response) {
-      $rootScope.currentUser = response.data.user;
-      $window.localStorage.user = JSON.stringify(response.data.user);
-      $location.path('/pointBoard');
-    }).catch(function (response) {
-      if (response.error) {
-        $scope.messages = {
-          error: [{ msg: response.error }]
-        };
-      } else if (response.data) {
-        $scope.messages = {
-          error: [response.data]
-        };
-      }
-    });
-  };
-}]);
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.auth').controller('ResetController', ResetController);
-
-  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
-  function ResetController($rootScope, $location, $window, $auth, Account) {
-    var vm = this;
-
-    vm.resetPassword = resetPassword;
-
-    activate();
-
-    ////////////////
-
-    function activate() {}
-
-    function resetPassword() {
-      var token = $location.search().token;
-      Account.resetPassword(token, vm.user).then(function (response) {
-        $auth.setToken(response);
-        $rootScope.currentUser = response.data.user;
-        $window.localStorage.user = JSON.stringify(response.data.user);
-        $location.path('/');
-      }).catch(function (err) {
-        vm.messages = {
-          error: Array.isArray(err.data) ? err.data : [err.data]
-        };
-      });
-    }
-  }
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.auth').controller('SignupController', SignupController);
-
-  SignupController.$inject = ['$rootScope', '$location', '$window', '$auth'];
-  function SignupController($rootScope, $location, $window, $auth) {
-    var vm = this;
-
-    vm.signup = signup;
-
-    activate();
-
-    ////////////////
-
-    function activate() {}
-
-    function signup() {
-      $auth.signup(vm.user).then(function (response) {
-        vm.user = null;
-        vm.messages = {
-          success: Array.isArray(response.data) ? response.data : [response.data]
-        };
-      }).catch(function (response) {
-        vm.messages = {
-          error: Array.isArray(response.data) ? response.data : [response.data]
-        };
-      });
-    }
-  }
+  angular.module('app.auth', []);
 })();
 'use strict';
 
@@ -303,6 +147,47 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
 })();
 'use strict';
 
+angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function ($scope, $location, $window, $auth) {
+  $scope.isActive = function (viewLocation) {
+    return viewLocation === $location.path();
+  };
+
+  $scope.isAuthenticated = function () {
+    return $auth.isAuthenticated();
+  };
+
+  $scope.logout = function () {
+    $auth.logout();
+    delete $window.localStorage.user;
+    $location.path('/');
+  };
+}]);
+'use strict';
+
+(function () {
+    'use strict';
+
+    angular.module('app.layout').controller('HomeController', HomeController);
+
+    HomeController.$inject = ['$scope', '$auth'];
+    function HomeController($scope, $auth) {
+        var vm = this;
+
+        vm.isAuthenticated = isAuthenticated;
+
+        activate();
+
+        ////////////////
+
+        function activate() {}
+
+        function isAuthenticated() {
+            return $auth.isAuthenticated();
+        }
+    }
+})();
+'use strict';
+
 (function () {
   'use strict';
 
@@ -316,6 +201,7 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
     vm.dongs = [];
     vm.rockstars = [];
     vm.recent = [];
+    vm.recentMessage = null;
     vm.pointType = 'dong';
     vm.message = null;
     vm.show = {
@@ -329,6 +215,7 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
     vm.setPointType = setPointType;
     vm.getUsersPoints = getUsersPoints;
     vm.createUserPoint = createUserPoint;
+    vm.messageVote = messageVote;
     vm.removeUserPoint = removeUserPoint;
     vm.selectUser = selectUser;
     vm.toggleShow = toggleShow;
@@ -411,6 +298,28 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
           vm.user = null;
         });
       }
+    }
+
+    function messageVote(userVote, voteType) {
+      Point.messageVote(userVote._id, voteType).then(function (response) {
+        // set user vote object with change
+        setUserVote(response.data, userVote, voteType);
+        // emit change
+        notifyMessageVote(userVote, voteType);
+      }).catch(function (err) {
+        setMsg(err.data, true);
+      });
+    }
+
+    /**
+     * Helper function to set user vote and 
+     * have the change event fire
+     */
+    function setUserVote(src, target, voteType) {
+      target.downvote = src.downvote;
+      target.upvote = src.upvote;
+      target[voteType + 'Changed'] = true;
+      setToFalse(target, voteType + 'Changed', 2000);
     }
 
     /**
@@ -522,6 +431,10 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
       Socket.emit('user:newUserLoggedIn', loggedInUser);
     }
 
+    function notifyMessageVote(userVote, voteType) {
+      Socket.emit('point:messageVote', { userVote: userVote, coteType: voteType });
+    }
+
     function setToFalse(obj, prop, delay) {
       return $timeout(function () {
         obj[prop] = false;
@@ -560,6 +473,20 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
       Socket.emit('user:userDetailRes', vm.currentUser);
     });
 
+    /**
+     * Someone upvoted or downvoted
+     */
+    Socket.on('point:newMessageVote', function (messageVote) {
+      // loop through all recent and find userVote
+      vm.recent.forEach(function (currVote) {
+        if (currVote._id === messageVote.userVote._id) {
+          // Set the userVote item to match the up/downvotes
+          setUserVote(messageVote.userVote, currVote, messageVote.voteType);
+          return;
+        }
+      }, this);
+    });
+
     // A new user logged in, update logged in user list
     Socket.on('user:loggedin', function (users) {
       setLoggedInUsers(users.loggedInUsers);
@@ -595,47 +522,6 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
       });
     }
   }
-})();
-'use strict';
-
-angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function ($scope, $location, $window, $auth) {
-  $scope.isActive = function (viewLocation) {
-    return viewLocation === $location.path();
-  };
-
-  $scope.isAuthenticated = function () {
-    return $auth.isAuthenticated();
-  };
-
-  $scope.logout = function () {
-    $auth.logout();
-    delete $window.localStorage.user;
-    $location.path('/');
-  };
-}]);
-'use strict';
-
-(function () {
-    'use strict';
-
-    angular.module('app.layout').controller('HomeController', HomeController);
-
-    HomeController.$inject = ['$scope', '$auth'];
-    function HomeController($scope, $auth) {
-        var vm = this;
-
-        vm.isAuthenticated = isAuthenticated;
-
-        activate();
-
-        ////////////////
-
-        function activate() {}
-
-        function isAuthenticated() {
-            return $auth.isAuthenticated();
-        }
-    }
 })();
 'use strict';
 
@@ -685,6 +571,9 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     },
     createPoint: function createPoint(data) {
       return $http.post('/api/point', data);
+    },
+    messageVote: function messageVote(userVoteId, voteType) {
+      return $http.put('/api/userVotes/' + userVoteId + '/' + voteType);
     },
     removePoint: function removePoint(toUser, pointType, query) {
       var options = {};
@@ -898,6 +787,162 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
       }).catch(function (response) {
         vm.messages = {
           error: [response.data]
+        };
+      });
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.auth').controller('ActivateController', ActivateController);
+
+  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Socket'];
+  function ActivateController($rootScope, $location, $window, $auth, Account, Socket) {
+    var vm = this;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+      activateAccount();
+    }
+
+    function activateAccount() {
+      var token = $location.search().token;
+      Account.activateAccount(token).then(function (response) {
+        Socket.emit('users:newAccountActivated');
+        $auth.setToken(response);
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/');
+      }).catch(function (err) {
+        if (err.error) {
+          vm.messages = {
+            error: [{ msg: err.error }]
+          };
+        } else if (err.data) {
+          vm.messages = {
+            error: [err.data]
+          };
+        }
+      });
+    }
+  }
+})();
+'use strict';
+
+angular.module('app.auth').controller('ForgotCtrl', ["$scope", "Account", function ($scope, Account) {
+  $scope.forgotPassword = function () {
+    Account.forgotPassword($scope.user).then(function (response) {
+      $scope.messages = {
+        success: [response.data]
+      };
+    }).catch(function (response) {
+      $scope.messages = {
+        error: Array.isArray(response.data) ? response.data : [response.data]
+      };
+    });
+  };
+}]);
+'use strict';
+
+angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$location", "$window", "$auth", function ($scope, $rootScope, $location, $window, $auth) {
+  $scope.login = function () {
+    $auth.login($scope.user).then(function (response) {
+      $rootScope.currentUser = response.data.user;
+      $window.localStorage.user = JSON.stringify(response.data.user);
+      $location.path('/pointBoard');
+    }).catch(function (response) {
+      $scope.messages = {
+        error: Array.isArray(response.data) ? response.data : [response.data]
+      };
+    });
+  };
+
+  $scope.authenticate = function (provider) {
+    $auth.authenticate(provider).then(function (response) {
+      $rootScope.currentUser = response.data.user;
+      $window.localStorage.user = JSON.stringify(response.data.user);
+      $location.path('/pointBoard');
+    }).catch(function (response) {
+      if (response.error) {
+        $scope.messages = {
+          error: [{ msg: response.error }]
+        };
+      } else if (response.data) {
+        $scope.messages = {
+          error: [response.data]
+        };
+      }
+    });
+  };
+}]);
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.auth').controller('ResetController', ResetController);
+
+  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
+  function ResetController($rootScope, $location, $window, $auth, Account) {
+    var vm = this;
+
+    vm.resetPassword = resetPassword;
+
+    activate();
+
+    ////////////////
+
+    function activate() {}
+
+    function resetPassword() {
+      var token = $location.search().token;
+      Account.resetPassword(token, vm.user).then(function (response) {
+        $auth.setToken(response);
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/');
+      }).catch(function (err) {
+        vm.messages = {
+          error: Array.isArray(err.data) ? err.data : [err.data]
+        };
+      });
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.auth').controller('SignupController', SignupController);
+
+  SignupController.$inject = ['$rootScope', '$location', '$window', '$auth'];
+  function SignupController($rootScope, $location, $window, $auth) {
+    var vm = this;
+
+    vm.signup = signup;
+
+    activate();
+
+    ////////////////
+
+    function activate() {}
+
+    function signup() {
+      $auth.signup(vm.user).then(function (response) {
+        vm.user = null;
+        vm.messages = {
+          success: Array.isArray(response.data) ? response.data : [response.data]
+        };
+      }).catch(function (response) {
+        vm.messages = {
+          error: Array.isArray(response.data) ? response.data : [response.data]
         };
       });
     }
