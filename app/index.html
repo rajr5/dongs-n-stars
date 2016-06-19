@@ -7,11 +7,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dongs N Stars</title>
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="/angularjs-toaster/toaster.css">
   <link rel="stylesheet" href="/css/main.css">
 
 </head>
 <body ng-app="app">
   <div ng-include src="'layout/header.html'"></div>
+  <toaster-container 
+    toaster-options="{'close-button': true, 'position-class': 'toast-top-left'}">
+  </toaster-container>
   <div ng-view></div>
   <div ng-include src="'layout/footer.html'"></div>
 
@@ -21,6 +25,7 @@
   <script src="/angular-animate/angular-animate.js"></script>
   <script src="/angular-touch/angular-touch.js"></script>
   <script src="/angular-route/angular-route.js"></script>
+  <script src="/angularjs-toaster/toaster.js"></script>
   <script src="/angular-ui-bootstrap/dist/ui-bootstrap.js"></script>
   <script src="/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
   <script src="/satellizer/satellizer.js"></script>

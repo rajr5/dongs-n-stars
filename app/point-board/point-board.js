@@ -5,8 +5,8 @@
     .module('app.point-board')
     .controller('PointController', PointController);
 
-  PointController.$inject = ['$scope','$timeout', '$q', 'Point', 'Account', 'Socket'];
-  function PointController($scope, $timeout, $q, Point, Account, Socket) {
+  PointController.$inject = ['$scope','$timeout', '$q', 'Point', 'Account', 'Socket', 'Toast'];
+  function PointController($scope, $timeout, $q, Point, Account, Socket, Toast) {
     var vm = this;
 
     vm.userPoints = null;
@@ -52,7 +52,8 @@
         setPoints();
       })
       .catch(function(response){
-        setMsg(response.data, true);
+        Toast.show('error', 'Error', response.data);
+        // setMsg(response.data, true);
       });
     }
 
@@ -63,7 +64,8 @@
         getLoggedInUsers();
       })
       .catch(function(response){
-        setMsg(response.data, true);
+        // Toast.show('error', 'Error', response.data);
+        // setMsg(response.data, true);
       });
     }
 
@@ -94,7 +96,8 @@
      */
     function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
-        setMsg({msg: 'You must select a user'}, true);
+        // setMsg({msg: 'You must select a user'}, true);
+        Toast.show('error', 'Error', {msg: 'You must select a user'});
       } else {
         var data = {
           pointType: pointType,
@@ -109,12 +112,14 @@
           notifyPoint(userPoints.data.userVote);
           // Update userpoint list
           getUsersPoints();
-          setMsg(userPoints.data, false);
+          Toast.show('success', 'Success', userPoints.data);
+          // setMsg(userPoints.data, false);
           vm.user = null;
           vm.message = null;
         })
         .catch(function(response){
-          setMsg(response.data, true);
+          Toast.show('error', 'Error', response.data);
+          // setMsg(response.data, true);
           vm.user = null;
         });
       }
@@ -129,8 +134,9 @@
         // emit change
         notifyMessageVote(userVote, voteType);
       })
-      .catch(function(err) {
-        setMsg(err.data, true);
+      .catch(function(response) {
+        // setMsg(response.data, true);
+        Toast.show('error', 'Error', response.data);
       });
     }
 
@@ -161,10 +167,16 @@
         notifyPoint(userPoints.data.userVote);
         // update dong/rockstar
         getUsersPoints();
-        setMsg(userPoints.data, false);
+        // setMsg(userPoints.data, false);
+        Toast.show('success', 'Success', userPoints.data);
+        
+        
       })
       .catch(function(response){
-        setMsg(response.data, true);
+        // setMsg(response.data, true);
+        Toast.show('error', 'Error', response.data);
+        
+        
       });
     }
 
@@ -230,6 +242,8 @@
       });
     }
 
+
+
     function setMsg(msg, isError) {
       if(!Array.isArray(msg)) {
         msg = [msg];
@@ -290,6 +304,7 @@
       userVote.userVote.successClass = true;
       setToFalse(userVote.userVote, 'successClass', 5000);
       vm.recent.push(userVote.userVote);
+      Toast.show('note', 'Point Given', 'Another user added/removed a point');
       // update board with point change
       getUsersPoints();
     });
@@ -312,6 +327,7 @@
         if (currVote._id === messageVote.userVote._id) {
           // Set the userVote item to match the up/downvotes
           setUserVote(messageVote.userVote, currVote, messageVote.voteType);
+          Toast.show('note', 'New Message Vote', 'Another user voted on a message');
           return;
         }
       }, this);
@@ -324,6 +340,7 @@
 
     // Update user list if a new user registers
     Socket.on('users:newAccount', (obj) => {
+      Toast.show('note', 'New User', 'New user registered, list updated');
       getUsers();
     });
 

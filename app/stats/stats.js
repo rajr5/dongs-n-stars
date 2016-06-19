@@ -5,8 +5,8 @@
     .module('app.stats')
     .controller('StatsController', StatsController);
 
-  StatsController.$inject = ['$sce','Stats'];
-  function StatsController($sce, Stats) {
+  StatsController.$inject = ['$sce','Stats', 'Toast'];
+  function StatsController($sce, Stats, Toast) {
     var vm = this;
 
     // 7: {
@@ -43,8 +43,8 @@
         addMessages(vm.mostPoints[numDays].dongs, 'dongs');
         addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
       })
-      .catch(function(err){
-        console.log('err', err);
+      .catch(function(response){
+        Toast.show('error', 'Error', response.data);
       });
     }
 

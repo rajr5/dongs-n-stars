@@ -1,16 +1,12 @@
 angular.module('app.auth')
-  .controller('ForgotCtrl', function($scope, Account) {
+  .controller('ForgotCtrl', function($scope, Account, Toast) {
     $scope.forgotPassword = function() {
       Account.forgotPassword($scope.user)
         .then(function(response) {
-          $scope.messages = {
-            success: [response.data]
-          };
+          Toast.show('success', 'Success', response.data);
         })
         .catch(function(response) {
-          $scope.messages = {
-            error: Array.isArray(response.data) ? response.data : [response.data]
-          };
+          Toast.show('error', 'Error', response.data);
         });
-    }
+    };
   });

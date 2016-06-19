@@ -1,12 +1,6 @@
 <div class="login-container">
   <div class="panel">
     <div class="panel-body">
-      <div ng-if="vm.messages.error" role="alert" class="alert alert-danger">
-        <div ng-repeat="error in vm.messages.error">{{error.msg}}</div>
-      </div>
-      <div ng-if="vm.messages.success" role="alert" class="alert alert-success">
-        <div ng-repeat="success in vm.messages.success">{{success.msg}}</div>
-      </div>
       <form ng-submit="vm.signup()">
         <legend>Create an account</legend>
         <div class="form-group">
@@ -24,7 +18,7 @@
         <div class="form-group">
           <small class="text-muted">By signing up, you agree to the <a href="/">Terms of Service</a>.</small>
         </div>
-        <button type="submit" class="btn btn-success">Create an account</button>
+        <button type="submit" class="btn btn-success" ng-disabled="vm.buttonDisable">Create an account</button>
       </form>
     </div>
   </div>

@@ -5,8 +5,8 @@
     .module('app.auth')
     .controller('ActivateController', ActivateController);
 
-  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Socket'];
-  function ActivateController($rootScope, $location, $window, $auth, Account, Socket) {
+  ActivateController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Socket', 'Toast'];
+  function ActivateController($rootScope, $location, $window, $auth, Account, Socket, Toast) {
     var vm = this;
 
     activate();
@@ -25,18 +25,10 @@
         $auth.setToken(response);
         $rootScope.currentUser = response.data.user;
         $window.localStorage.user = JSON.stringify(response.data.user);
-        $location.path('/');
+        $location.path('/pointBoard');
       })
-      .catch((err) => {
-        if (err.error) {
-          vm.messages = {
-            error: [{ msg: err.error }]
-          };
-        } else if (err.data) {
-          vm.messages = {
-            error: [err.data]
-          };
-        }
+      .catch((response) => {
+        Toast.show('error', 'Error', response.error || response.data);
       });
     }
   }

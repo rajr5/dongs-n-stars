@@ -1,5 +1,5 @@
 angular.module('app.auth')
-  .controller('LoginCtrl', function($scope, $rootScope, $location, $window, $auth) {
+  .controller('LoginCtrl', function($scope, $rootScope, $location, $window, $auth, Toast) {
     $scope.login = function() {
       $auth.login($scope.user)
         .then(function(response) {
@@ -8,9 +8,7 @@ angular.module('app.auth')
           $location.path('/pointBoard');
         })
         .catch(function(response) {
-          $scope.messages = {
-            error: Array.isArray(response.data) ? response.data : [response.data]
-          };
+          Toast.show('error', 'Error', response.data);
         });
     };
 
@@ -22,15 +20,7 @@ angular.module('app.auth')
           $location.path('/pointBoard');
         })
         .catch(function(response) {
-          if (response.error) {
-            $scope.messages = {
-              error: [{ msg: response.error }]
-            };
-          } else if (response.data) {
-            $scope.messages = {
-              error: [response.data]
-            };
-          }
+          Toast.show('error', 'Error', response.error || response.data);
         });
     };
   });

@@ -10,6 +10,6 @@
     'ngAnimate', 'ngTouch',
 
     /** 3rd Party Modules */
-    'ui.bootstrap',
+    'ui.bootstrap', 'toaster'
   ]);
 })();

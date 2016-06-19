@@ -5,8 +5,8 @@
     .module('app.auth')
     .controller('ResetController', ResetController);
 
-  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account'];
-  function ResetController($rootScope, $location, $window, $auth, Account) {
+  ResetController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast'];
+  function ResetController($rootScope, $location, $window, $auth, Account, Toast) {
     var vm = this;
 
     vm.resetPassword = resetPassword;
@@ -28,10 +28,8 @@
         $window.localStorage.user = JSON.stringify(response.data.user);
         $location.path('/');
       })
-      .catch((err) => {
-        vm.messages= {
-          error: Array.isArray(err.data) ? err.data : [err.data]
-        };
+      .catch((response) => {
+        Toast.show('error', 'Error', response.data);
       });
     }
   }
