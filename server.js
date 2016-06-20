@@ -84,7 +84,8 @@ app.get('*', function(req, res) {
 if (app.get('env') === 'production') {
   app.use(function(err, req, res, next) {
     console.error(err.stack);
-    res.sendStatus(err.status || 500);
+    res.status(err.status || 500);
+    res.json({msg: 'Server error occured. Please contact an administrator'});
   });
 }
 
