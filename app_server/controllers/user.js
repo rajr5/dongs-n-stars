@@ -145,10 +145,6 @@ exports.signupPost = function(req, res, next) {
       });
       // Save user
       user.save((err) => {
-        // TODO -> instead of giving token, make user confirm email account
-        // TODO -> on login, check to ensure account is active
-        // If token expired, give option to re-send token
-        // TODO -> send email here for account confirmation
         // Send activation token
         var email= {
           to: user.email,

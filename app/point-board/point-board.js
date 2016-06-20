@@ -22,6 +22,14 @@
       rockstar: true,
       dong: true
     };
+    
+    vm.popover = {
+      addDong: 'point-board/popover-templates/add-dong.html',
+      addRockstar: 'point-board/popover-templates/add-rockstar.html',
+      removeDong: 'point-board/popover-templates/remove-dong.html',
+      removeRockstar: 'point-board/popover-templates/remove-rockstar.html'
+    }
+
     vm.showRecentActivity = true;
 
     vm.setPointType = setPointType;
@@ -104,6 +112,7 @@
           toUser: toUser,
           message: message
         };
+        
         Point.createPoint(data)
         .then(function(userPoints) {
           enrichRecent([userPoints.data.userVote]);
@@ -116,6 +125,7 @@
           // setMsg(userPoints.data, false);
           vm.user = null;
           vm.message = null;
+          vm.pointMessage = null;
         })
         .catch(function(response){
           Toast.show('error', 'Error', response.data);
@@ -154,12 +164,13 @@
     /**
      * REMOVE user point
      */
-    function removeUserPoint(toUser, pointType) {
-      var data = {
-        pointType: pointType,
-        toUser: toUser
-      };
-      Point.removePoint(toUser, pointType)
+    function removeUserPoint(toUser, pointType, message) {
+      // var data = {
+      //   pointType: pointType,
+      //   toUser: toUser,
+      //   message: message
+      // };
+      Point.removePoint(toUser, pointType, {message: message})
       .then(function(userPoints) {
         enrichRecent([userPoints.data.userVote]);
         vm.recent.push(userPoints.data.userVote);
@@ -169,7 +180,8 @@
         getUsersPoints();
         // setMsg(userPoints.data, false);
         Toast.show('success', 'Success', userPoints.data);
-        
+        vm.message = null;
+        vm.pointMessage = null;
         
       })
       .catch(function(response){

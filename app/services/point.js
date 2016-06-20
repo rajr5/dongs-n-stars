@@ -3,17 +3,17 @@ angular.module('app.services')
     return {
       getUsersPoints: function(query) {
         var options = {};
-        options.query = query;
+        options.params = query;
         return $http.get('/api/userPoints', options);
       },
       getUserPoints: function(id, query) {
         var options = {};
-        options.query = query;
+        options.params = query;
         return $http.get('/api/userPoints/'+id, options);
       },
       getUserVotes: function(id, query) {
         var options = {};
-        options.query = query;
+        options.params = query;
         return $http.get('/api/userVotes', options);
       },
       createPoint: function(data) {
@@ -24,7 +24,7 @@ angular.module('app.services')
       },
       removePoint: function(toUser, pointType, query) {
         var options = {};
-        options.query = query || {};
+        options.params = query || {};
         return $http.delete('/api/point/'+toUser+'/'+pointType, options);
       }
     };

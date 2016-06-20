@@ -1,0 +1,12 @@
+<div>
+    <textarea 
+        ng-model="vm.pointMessage" 
+        class="form-control" 
+        rows="4" 
+        placeholder="Message">
+    </textarea>
+
+    <button
+        ng-click="vm.removeUserPoint(point.toUser, 'dong', vm.pointMessage)" 
+        class="btn btn-info btn-xs">Remove Point</button>
+</div>

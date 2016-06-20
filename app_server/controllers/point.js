@@ -4,8 +4,10 @@ var UserPoint = require('../models/userPoint');
 var UserVote = require('../models/userVote');
 var PointService = require('../services/pointService');
 
-MAX_VOTES = 5;
-
+var MAX_VOTES = process.env.MAX_VOTES || 5;
+if (typeof MAX_VOTES === 'string') {
+  MAX_VOTES = Number.parseInt(MAX_VOTES);
+}
 /**
  * 200 - OK success GET
  * 201 - created success POST
@@ -178,7 +180,7 @@ exports.messageVote = function(req, res) {
 
 
 /**
- * DELETE /point
+ * DELETE /point/:toUser/:pointType
  */
 exports.removeUserPoint = function(req, res) {
   req.assert('pointType', 'Point type is not valid.  Valid types are dong and rockstar').notEmpty().isIn(['dong', 'rockstar']);
@@ -193,12 +195,14 @@ exports.removeUserPoint = function(req, res) {
   var fromUserId = req.user._id;
   var toUserId = req.params.toUser || req.query.toUser || req.body.toUser;
   var pointType = req.params.pointType || req.query.pointType || req.body.pointType;
+  var message = req.query.message || req.body.message || null;
 
   // Prepare to create usertype, save after userpoint successfully created
   var userVote = new UserVote({
     fromUser: fromUserId,
     toUser: toUserId,
-    type: pointType
+    type: pointType,
+    message: message
   });
   userVote[pointType] = -1;
 
@@ -252,7 +256,7 @@ function eligibleToVote(fromUserId) {
       voteDate: {$gt: yesterday}
       })
       .then((userVotes) => {
-        if (userVotes.length > MAX_VOTES) {
+        if (userVotes.length >= MAX_VOTES) {
           return reject({msg: 'Sorry Capn\' you only get ' + MAX_VOTES + ' per day!'});
         } else {
           return resolve(userVotes);
