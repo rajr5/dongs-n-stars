@@ -20,6 +20,8 @@ pids
 #Build dir
 build
 /db/
+public/js/application.js
+public/js/templates.js
 
 # random docker db folder :(
 /db/

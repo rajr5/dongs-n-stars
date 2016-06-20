@@ -5,8 +5,8 @@
       .module('app.user')
       .controller('ProfileController', ProfileController);
 
-    ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast'];
-    function ProfileController($rootScope, $location, $window, $auth, Account, Toast) {
+    ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast', 'Modal'];
+    function ProfileController($rootScope, $location, $window, $auth, Account, Toast, Modal) {
       var vm = this;
       vm.profile = $rootScope.currentUser;
       vm.updateProfile = updateProfile;
@@ -19,13 +19,6 @@
 
       function activate() {
         delete vm.profile.password;
-        // Modal.open('small', 'my title', 'some content')
-        // .then(function(data){
-        //   console.log('data', data);
-        // })
-        // .catch(function(data){
-        //   console.log('data', data);
-        // });
       }
 
     function updateProfile() {
@@ -57,16 +50,23 @@
     }
 
     function deleteAccount() {
-      Account.deleteAccount()
-        .then(function() {
-          $auth.logout();
-          delete $window.localStorage.user;
-          $location.path('/');
-          Toast.show('warning', 'Success', 'Account was successfully deleted');
-        })
-        .catch(function(response) {
-          Toast.show('error', 'Error', response.data);
-        });
+      Modal.open('Are you sure?', 'Would you really like to delete your account?', {confirm: 'Yes, delete my account', cancel: 'No, keep my account'})
+      .result.then(function(data){
+        // User confirmed, delete account
+        Account.deleteAccount()
+          .then(function() {
+            $auth.logout();
+            delete $window.localStorage.user;
+            $location.path('/');
+            Toast.show('warning', 'Success', 'Account was successfully deleted');
+          })
+          .catch(function(response) {
+            Toast.show('error', 'Error', response.data);
+          });
+      }, function(data) {
+        console.log('data', data);
+      });
+
     }
 
     }

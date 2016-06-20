@@ -17,14 +17,14 @@
 (function () {
   'use strict';
 
-  angular.module('app.auth', []);
+  angular.module('app.config', ['ngRoute', 'satellizer']);
 })();
 'use strict';
 
 (function () {
   'use strict';
 
-  angular.module('app.config', ['ngRoute', 'satellizer']);
+  angular.module('app.auth', []);
 })();
 'use strict';
 
@@ -52,13 +52,6 @@
 (function () {
   'use strict';
 
-  angular.module('app.services', []);
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
   angular.module('app.stats', []);
 })();
 'use strict';
@@ -66,7 +59,91 @@
 (function () {
   'use strict';
 
+  angular.module('app.services', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
   angular.module('app.user', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.config').config(["$routeProvider", "$locationProvider", "$authProvider", function ($routeProvider, $locationProvider, $authProvider) {
+    skipIfAuthenticated.$inject = ["$location", "$auth"];
+    loginRequired.$inject = ["$location", "$auth"];
+    $locationProvider.html5Mode(true);
+
+    $routeProvider.when('/', {
+      templateUrl: 'layout/home.html',
+      controller: 'HomeController',
+      controllerAs: 'vm'
+    }).when('/login', {
+      templateUrl: 'auth/login.html',
+      controller: 'LoginCtrl',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/signup', {
+      templateUrl: 'auth/signup.html',
+      controller: 'SignupController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/forgot', {
+      templateUrl: 'auth/forgot.html',
+      controller: 'ForgotCtrl',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/reset', {
+      templateUrl: 'auth/reset.html',
+      controller: 'ResetController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/activate', {
+      templateUrl: 'auth/activate.html',
+      controller: 'ActivateController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/account', {
+      templateUrl: 'user/profile.html',
+      controller: 'ProfileController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).when('/pointBoard', {
+      templateUrl: 'point-board/point-board.html',
+      controller: 'PointController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).when('/stats', {
+      templateUrl: 'stats/stats.html',
+      controller: 'StatsController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).otherwise({
+      templateUrl: 'layout/404.html'
+    });
+
+    $authProvider.loginUrl = '/api/login';
+    $authProvider.signupUrl = '/api/signup';
+
+    function skipIfAuthenticated($location, $auth) {
+      if ($auth.isAuthenticated()) {
+        $location.path('/');
+      }
+    }
+
+    function loginRequired($location, $auth) {
+      if (!$auth.isAuthenticated()) {
+        $location.path('/login');
+      }
+    }
+  }]).run(["$rootScope", "$window", function ($rootScope, $window) {
+    if ($window.localStorage.user) {
+
+      $rootScope.currentUser = JSON.parse($window.localStorage.user);
+    }
+  }]);
 })();
 'use strict';
 
@@ -199,83 +276,6 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
       });
     }
   }
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.config').config(["$routeProvider", "$locationProvider", "$authProvider", function ($routeProvider, $locationProvider, $authProvider) {
-    skipIfAuthenticated.$inject = ["$location", "$auth"];
-    loginRequired.$inject = ["$location", "$auth"];
-    $locationProvider.html5Mode(true);
-
-    $routeProvider.when('/', {
-      templateUrl: 'layout/home.html',
-      controller: 'HomeController',
-      controllerAs: 'vm'
-    }).when('/login', {
-      templateUrl: 'auth/login.html',
-      controller: 'LoginCtrl',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/signup', {
-      templateUrl: 'auth/signup.html',
-      controller: 'SignupController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/forgot', {
-      templateUrl: 'auth/forgot.html',
-      controller: 'ForgotCtrl',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/reset', {
-      templateUrl: 'auth/reset.html',
-      controller: 'ResetController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/activate', {
-      templateUrl: 'auth/activate.html',
-      controller: 'ActivateController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/account', {
-      templateUrl: 'user/profile.html',
-      controller: 'ProfileController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).when('/pointBoard', {
-      templateUrl: 'point-board/point-board.html',
-      controller: 'PointController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).when('/stats', {
-      templateUrl: 'stats/stats.html',
-      controller: 'StatsController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).otherwise({
-      templateUrl: 'layout/404.html'
-    });
-
-    $authProvider.loginUrl = '/api/login';
-    $authProvider.signupUrl = '/api/signup';
-
-    function skipIfAuthenticated($location, $auth) {
-      if ($auth.isAuthenticated()) {
-        $location.path('/');
-      }
-    }
-
-    function loginRequired($location, $auth) {
-      if (!$auth.isAuthenticated()) {
-        $location.path('/login');
-      }
-    }
-  }]).run(["$rootScope", "$window", function ($rootScope, $window) {
-    if ($window.localStorage.user) {
-
-      $rootScope.currentUser = JSON.parse($window.localStorage.user);
-    }
-  }]);
 })();
 'use strict';
 
@@ -668,6 +668,78 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 })();
 'use strict';
 
+(function () {
+  'use strict';
+
+  angular.module('app.stats').controller('StatsController', StatsController);
+
+  StatsController.$inject = ['$sce', 'Stats', 'Toast'];
+  function StatsController($sce, Stats, Toast) {
+    var vm = this;
+
+    // 7: {
+    //   numDays: 7,
+    //   dongs: [],
+    //   rockstars: []
+    // }
+    vm.mostPoints = {};
+
+    vm.rockstarTemplate = '/stats/stats.popup.html';
+
+    vm.getMessagesHtml = getMessagesHtml;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+      getStats(1, true);
+      getStats(3);
+      getStats(5);
+      getStats(7);
+      getStats(14);
+      getStats(30);
+    }
+
+    function getStats(numDays, isOpen) {
+      isOpen = isOpen || false;
+      // build query strings as needed
+      Stats.getStats({ numDays: numDays }).then(function (stats) {
+        vm.mostPoints[numDays] = stats.data;
+        vm.mostPoints[numDays].isOpen = isOpen;
+        addMessages(vm.mostPoints[numDays].dongs, 'dongs');
+        addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
+      }).catch(function (response) {
+        Toast.show('error', 'Error', response.data);
+      });
+    }
+
+    function addMessages(points, type) {
+      points.forEach(function (point) {
+        point.messages = getMessagesHtml(point[type]);
+      });
+    }
+
+    function getMessagesHtml(pointArray) {
+      var hasMsg = false;
+      var html = '<ul style=" padding-left:5px;">';
+      pointArray.forEach(function (element) {
+        if (element.message) {
+          hasMsg = true;
+          html += '<li>' + element.message + '</li>';
+        }
+      });
+      html += '</ul>';
+      if (hasMsg) {
+        return $sce.trustAsHtml(html);
+      } else {
+        return false;
+      }
+    }
+  }
+})();
+'use strict';
+
 angular.module('app.services').factory('Account', ["$http", function ($http) {
   return {
     updateProfile: function updateProfile(data) {
@@ -843,82 +915,10 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 (function () {
   'use strict';
 
-  angular.module('app.stats').controller('StatsController', StatsController);
-
-  StatsController.$inject = ['$sce', 'Stats', 'Toast'];
-  function StatsController($sce, Stats, Toast) {
-    var vm = this;
-
-    // 7: {
-    //   numDays: 7,
-    //   dongs: [],
-    //   rockstars: []
-    // }
-    vm.mostPoints = {};
-
-    vm.rockstarTemplate = '/stats/stats.popup.html';
-
-    vm.getMessagesHtml = getMessagesHtml;
-
-    activate();
-
-    ////////////////
-
-    function activate() {
-      getStats(1, true);
-      getStats(3);
-      getStats(5);
-      getStats(7);
-      getStats(14);
-      getStats(30);
-    }
-
-    function getStats(numDays, isOpen) {
-      isOpen = isOpen || false;
-      // build query strings as needed
-      Stats.getStats({ numDays: numDays }).then(function (stats) {
-        vm.mostPoints[numDays] = stats.data;
-        vm.mostPoints[numDays].isOpen = isOpen;
-        addMessages(vm.mostPoints[numDays].dongs, 'dongs');
-        addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
-      }).catch(function (response) {
-        Toast.show('error', 'Error', response.data);
-      });
-    }
-
-    function addMessages(points, type) {
-      points.forEach(function (point) {
-        point.messages = getMessagesHtml(point[type]);
-      });
-    }
-
-    function getMessagesHtml(pointArray) {
-      var hasMsg = false;
-      var html = '<ul style=" padding-left:5px;">';
-      pointArray.forEach(function (element) {
-        if (element.message) {
-          hasMsg = true;
-          html += '<li>' + element.message + '</li>';
-        }
-      });
-      html += '</ul>';
-      if (hasMsg) {
-        return $sce.trustAsHtml(html);
-      } else {
-        return false;
-      }
-    }
-  }
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
   angular.module('app.user').controller('ProfileController', ProfileController);
 
-  ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast'];
-  function ProfileController($rootScope, $location, $window, $auth, Account, Toast) {
+  ProfileController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Account', 'Toast', 'Modal'];
+  function ProfileController($rootScope, $location, $window, $auth, Account, Toast, Modal) {
     var vm = this;
     vm.profile = $rootScope.currentUser;
     vm.updateProfile = updateProfile;
@@ -931,13 +931,6 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 
     function activate() {
       delete vm.profile.password;
-      // Modal.open('small', 'my title', 'some content')
-      // .then(function(data){
-      //   console.log('data', data);
-      // })
-      // .catch(function(data){
-      //   console.log('data', data);
-      // });
     }
 
     function updateProfile() {
@@ -965,81 +958,91 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     }
 
     function deleteAccount() {
-      Account.deleteAccount().then(function () {
-        $auth.logout();
-        delete $window.localStorage.user;
-        $location.path('/');
-        Toast.show('warning', 'Success', 'Account was successfully deleted');
-      }).catch(function (response) {
-        Toast.show('error', 'Error', response.data);
+      Modal.open('Are you sure?', 'Would you really like to delete your account?', { confirm: 'Yes, delete my account', cancel: 'No, keep my account' }).result.then(function (data) {
+        // User confirmed, delete account
+        Account.deleteAccount().then(function () {
+          $auth.logout();
+          delete $window.localStorage.user;
+          $location.path('/');
+          Toast.show('warning', 'Success', 'Account was successfully deleted');
+        }).catch(function (response) {
+          Toast.show('error', 'Error', response.data);
+        });
+      }, function (data) {
+        console.log('data', data);
       });
     }
   }
 })();
-// (function() {
-// 'use strict';
+'use strict';
 
-//     angular
-//         .module('app.config')
-//         .controller('ModalController', ModalController);
+(function () {
+        'use strict';
 
-//     ModalController.$inject = ['$uibModalInstance', 'title', 'content'];
-//     function ModalController($uibModalInstance) {
-//         var vm = this;
-//         vm.title = title;
-//         vm.content = content;
+        angular.module('app.services').controller('ModalController', ModalController);
 
-//         activate();
+        ModalController.$inject = ['$uibModalInstance', 'title', 'content', 'buttons'];
+        function ModalController($uibModalInstance, title, content, buttons) {
+                var vm = this;
+                vm.title = title;
+                vm.content = content;
+                vm.ok = ok;
+                vm.cancel = cancel;
+                vm.buttons = buttons;
 
-//         ////////////////
+                activate();
 
-//         function activate() {
+                ////////////////
 
-//         }
+                function activate() {}
 
-//         function ok() {
-//           $uibModalInstance.close('ok');
-//         }
+                function ok() {
+                        $uibModalInstance.close('ok');
+                }
 
-//         function cancel() {
-//           $uibModalInstance.dismiss('cancel');
-//         }
-//     }
-// })();
-"use strict";
-// (function() {
-// 'use strict';
+                function cancel() {
+                        $uibModalInstance.dismiss('cancel');
+                }
+        }
+})();
+'use strict';
 
-//     angular
-//         .module('app.config')
-//         .factory('Modal', Modal);
+(function () {
+  'use strict';
 
-//     Modal.$inject = ['$uibModal'];
-//     function Modal($uibModal) {
-//         var service = {
-//             open:open
-//         };
+  angular.module('app.services').factory('Modal', Modal);
 
-//         return service;
+  Modal.$inject = ['$uibModal'];
+  function Modal($uibModal) {
+    var service = {
+      open: open
+    };
 
-//         ////////////////
-//         function open(size, title, content) {
-//           return $uibModal.open({
-//             animation: true,
-//             templateUrl: '/config/modal/modal.html',
-//             controller: 'ModalController',
-//             controllerAs: 'vm',
-//             size: size,
-//             resolve: {
-//               title: function () {
-//                 return title;
-//               },
-//               content: function() {
-//                 return content;
-//               }
-//             }
-//           });
-//         }
-//     }
-// })();
-"use strict";
+    return service;
+
+    /**
+     * @param title {String} Title of modal
+     * @param content {string|mixed} Content for modal
+     * @param buttons {object} Object to override 'ok' and 'cancel'  e.x. {confirm: 'Yes', cancel: 'No'}
+     * @param templateUrl {String} Path to alternative template to use.  Content should match datatype expected by template
+     */
+    function open(_title, _content, _buttons, templateUrl) {
+      return $uibModal.open({
+        templateUrl: templateUrl || 'services/modal/modal.html',
+        controller: 'ModalController',
+        controllerAs: 'vm',
+        resolve: {
+          title: function title() {
+            return _title || 'Confirm';
+          },
+          content: function content() {
+            return _content || '';
+          },
+          buttons: function buttons() {
+            return _buttons || { confirm: 'ok', cancel: 'cancel' };
+          }
+        }
+      });
+    }
+  }
+})();
