@@ -88,9 +88,16 @@ module.exports.socketController = (socket) => {
       userVote: userVote
     });
   });
-
-  socket.on('point:messageVote', (userVote) => {
+  /**
+   * Data: {userVote: {}, voteType}
+   */
+  socket.on('point:messageVote', (data) => {
     console.log('point:messageVote received');
-    socket.broadcast.emit('point:newMessageVote', userVote);
+    var output = {
+      fromUser: data.userVote.fromUser.name,
+      toUser: data.userVote.toUser.name,
+      voteType: voteType
+    };
+    socket.broadcast.emit('point:newMessageVote', output);
   });
 };

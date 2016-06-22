@@ -9,7 +9,7 @@
         <div class="column">
           <div class="col-md-6 col-sm-12">
 
-            <ul class="list-item-group">
+            <ol class="list-item-group">
               <h2 class="center-block"><small class="text-danger">Dong Miesters</small></h2>
               <li
                 ng-repeat="entry in value.dongs | orderBy: '-dongs.length'"
@@ -20,7 +20,7 @@
                   popover-trigger="mouseenter click"
                   popover-placement="bottom-right"
                   popover-enable="entry.messages"
-                  popover-title="Messages">
+                  popover-title="Comments">
                 {{entry.dongs.length}}</span>
                 <span
                   uib-tooltip="{{entry.user.email}}"
@@ -29,11 +29,10 @@
                   {{entry.user.name}}
                 </span>
               </li>
-            </ul>
+            </ol>
           </div>
           <div class="col-md-6 col-sm-12">
-
-            <ul class="list-item-group">
+            <ol class="list-item-group">
               <h2 class="center-block"><small class="text-success">Rockstars</small></h2>
               <li
                 ng-repeat="entry in value.rockstars | orderBy: '-rockstars.length'"
@@ -54,7 +53,7 @@
                   {{entry.user.name}}
                 </span>
               </li>
-            </ul>
+            </ol>
           </div>
         </div>
       </uib-accordion-group>

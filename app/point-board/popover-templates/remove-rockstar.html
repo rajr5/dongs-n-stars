@@ -7,6 +7,7 @@
     </textarea>
 
     <button
+        ng-disabled="vm.buttonsDisabled.vote"
         ng-click="vm.removeUserPoint(point.toUser, 'rockstar', vm.pointMessage)" 
         class="btn btn-info btn-xs">Remove Point</button>
 </div>

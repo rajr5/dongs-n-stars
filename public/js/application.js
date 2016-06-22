@@ -17,6 +17,13 @@
 (function () {
   'use strict';
 
+  angular.module('app.config', ['ngRoute', 'satellizer']);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
   angular.module('app.auth', []);
 })();
 'use strict';
@@ -24,7 +31,7 @@
 (function () {
   'use strict';
 
-  angular.module('app.config', ['ngRoute', 'satellizer']);
+  angular.module('app.point-board', []);
 })();
 'use strict';
 
@@ -39,13 +46,6 @@
   'use strict';
 
   angular.module('app.templates', []);
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.point-board', []);
 })();
 'use strict';
 
@@ -67,6 +67,84 @@
   'use strict';
 
   angular.module('app.user', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.config').config(["$routeProvider", "$locationProvider", "$authProvider", function ($routeProvider, $locationProvider, $authProvider) {
+    skipIfAuthenticated.$inject = ["$location", "$auth"];
+    loginRequired.$inject = ["$location", "$auth"];
+    $locationProvider.html5Mode(true);
+
+    $routeProvider.when('/', {
+      templateUrl: 'layout/home.html',
+      controller: 'HomeController',
+      controllerAs: 'vm'
+    }).when('/login', {
+      templateUrl: 'auth/login.html',
+      controller: 'LoginController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/signup', {
+      templateUrl: 'auth/signup.html',
+      controller: 'SignupController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/forgot', {
+      templateUrl: 'auth/forgot.html',
+      controller: 'ForgotController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/reset', {
+      templateUrl: 'auth/reset.html',
+      controller: 'ResetController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/activate', {
+      templateUrl: 'auth/activate.html',
+      controller: 'ActivateController',
+      controllerAs: 'vm',
+      resolve: { skipIfAuthenticated: skipIfAuthenticated }
+    }).when('/account', {
+      templateUrl: 'user/profile.html',
+      controller: 'ProfileController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).when('/pointBoard', {
+      templateUrl: 'point-board/point-board.html',
+      controller: 'PointController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).when('/stats', {
+      templateUrl: 'stats/stats.html',
+      controller: 'StatsController',
+      controllerAs: 'vm',
+      resolve: { loginRequired: loginRequired }
+    }).otherwise({
+      templateUrl: 'layout/404.html'
+    });
+
+    $authProvider.loginUrl = '/api/login';
+    $authProvider.signupUrl = '/api/signup';
+
+    function skipIfAuthenticated($location, $auth) {
+      if ($auth.isAuthenticated()) {
+        $location.path('/');
+      }
+    }
+
+    function loginRequired($location, $auth) {
+      if (!$auth.isAuthenticated()) {
+        $location.path('/login');
+      }
+    }
+  }]).run(["$rootScope", "$window", function ($rootScope, $window) {
+    if ($window.localStorage.user) {
+      $rootScope.currentUser = JSON.parse($window.localStorage.user);
+    }
+  }]);
 })();
 'use strict';
 
@@ -103,38 +181,112 @@
 })();
 'use strict';
 
-angular.module('app.auth').controller('ForgotCtrl', ["$scope", "Account", "Toast", function ($scope, Account, Toast) {
-  $scope.forgotPassword = function () {
-    Account.forgotPassword($scope.user).then(function (response) {
+(function () {
+  'use strict';
+
+  angular.module('app.auth').controller('ForgetController', ForgetController);
+
+  ForgetController.$inject = ['Account', 'Toast'];
+  function ForgetController(Account, Toast) {
+    var vm = this;
+    vm.forgotPassword = forgotPassword;
+    vm.user = null;
+
+    activate();
+
+    ////////////////
+
+    function activate() {}
+  }
+
+  function forgotPassword() {
+    Account.forgotPassword(vm.user).then(function (response) {
       Toast.show('success', 'Success', response.data);
     }).catch(function (response) {
       Toast.show('error', 'Error', response.data);
     });
   };
-}]);
+})();
+
+// angular.module('app.auth')
+//   .controller('ForgotCtrl', function($scope, Account, Toast) {
+//     $scope.forgotPassword = function() {
+//       Account.forgotPassword($scope.user)
+//         .then(function(response) {
+//           Toast.show('success', 'Success', response.data);
+//         })
+//         .catch(function(response) {
+//           Toast.show('error', 'Error', response.data);
+//         });
+//     };
+//   });
 'use strict';
 
-angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$location", "$window", "$auth", "Toast", function ($scope, $rootScope, $location, $window, $auth, Toast) {
-  $scope.login = function () {
-    $auth.login($scope.user).then(function (response) {
-      $rootScope.currentUser = response.data.user;
-      $window.localStorage.user = JSON.stringify(response.data.user);
-      $location.path('/pointBoard');
-    }).catch(function (response) {
-      Toast.show('error', 'Error', response.data);
-    });
-  };
+(function () {
+  'use strict';
 
-  $scope.authenticate = function (provider) {
-    $auth.authenticate(provider).then(function (response) {
-      $rootScope.currentUser = response.data.user;
-      $window.localStorage.user = JSON.stringify(response.data.user);
-      $location.path('/pointBoard');
-    }).catch(function (response) {
-      Toast.show('error', 'Error', response.error || response.data);
-    });
-  };
-}]);
+  angular.module('app.auth').controller('LoginController', LoginController);
+
+  LoginController.$inject = ['$rootScope', '$location', '$window', '$auth', 'Toast'];
+  function LoginController($rootScope, $location, $window, $auth, Toast) {
+    var vm = this;
+    vm.login = login;
+    vm.authenticate = authenticate;
+
+    activate();
+
+    ////////////////
+
+    function activate() {}
+
+    function login() {
+      $auth.login(vm.user).then(function (response) {
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/pointBoard');
+      }).catch(function (response) {
+        Toast.show('error', 'Error', response.data);
+      });
+    }
+
+    function authenticate(provider) {
+      $auth.authenticate(provider).then(function (response) {
+        $rootScope.currentUser = response.data.user;
+        $window.localStorage.user = JSON.stringify(response.data.user);
+        $location.path('/pointBoard');
+      }).catch(function (response) {
+        Toast.show('error', 'Error', response.error || response.data);
+      });
+    }
+  }
+})();
+
+// angular.module('app.auth')
+//   .controller('LoginCtrl', function($scope, $rootScope, $location, $window, $auth, Toast) {
+//     $scope.login = function() {
+//       $auth.login($scope.user)
+//         .then(function(response) {
+//           $rootScope.currentUser = response.data.user;
+//           $window.localStorage.user = JSON.stringify(response.data.user);
+//           $location.path('/pointBoard');
+//         })
+//         .catch(function(response) {
+//           Toast.show('error', 'Error', response.data);
+//         });
+//     };
+
+//     $scope.authenticate = function(provider) {
+//       $auth.authenticate(provider)
+//         .then(function(response) {
+//           $rootScope.currentUser = response.data.user;
+//           $window.localStorage.user = JSON.stringify(response.data.user);
+//           $location.path('/pointBoard');
+//         })
+//         .catch(function(response) {
+//           Toast.show('error', 'Error', response.error || response.data);
+//         });
+//     };
+//   });
 'use strict';
 
 (function () {
@@ -205,124 +357,6 @@ angular.module('app.auth').controller('LoginCtrl', ["$scope", "$rootScope", "$lo
 (function () {
   'use strict';
 
-  angular.module('app.config').config(["$routeProvider", "$locationProvider", "$authProvider", function ($routeProvider, $locationProvider, $authProvider) {
-    skipIfAuthenticated.$inject = ["$location", "$auth"];
-    loginRequired.$inject = ["$location", "$auth"];
-    $locationProvider.html5Mode(true);
-
-    $routeProvider.when('/', {
-      templateUrl: 'layout/home.html',
-      controller: 'HomeController',
-      controllerAs: 'vm'
-    }).when('/login', {
-      templateUrl: 'auth/login.html',
-      controller: 'LoginCtrl',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/signup', {
-      templateUrl: 'auth/signup.html',
-      controller: 'SignupController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/forgot', {
-      templateUrl: 'auth/forgot.html',
-      controller: 'ForgotCtrl',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/reset', {
-      templateUrl: 'auth/reset.html',
-      controller: 'ResetController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/activate', {
-      templateUrl: 'auth/activate.html',
-      controller: 'ActivateController',
-      controllerAs: 'vm',
-      resolve: { skipIfAuthenticated: skipIfAuthenticated }
-    }).when('/account', {
-      templateUrl: 'user/profile.html',
-      controller: 'ProfileController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).when('/pointBoard', {
-      templateUrl: 'point-board/point-board.html',
-      controller: 'PointController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).when('/stats', {
-      templateUrl: 'stats/stats.html',
-      controller: 'StatsController',
-      controllerAs: 'vm',
-      resolve: { loginRequired: loginRequired }
-    }).otherwise({
-      templateUrl: 'layout/404.html'
-    });
-
-    $authProvider.loginUrl = '/api/login';
-    $authProvider.signupUrl = '/api/signup';
-
-    function skipIfAuthenticated($location, $auth) {
-      if ($auth.isAuthenticated()) {
-        $location.path('/');
-      }
-    }
-
-    function loginRequired($location, $auth) {
-      if (!$auth.isAuthenticated()) {
-        $location.path('/login');
-      }
-    }
-  }]).run(["$rootScope", "$window", function ($rootScope, $window) {
-    if ($window.localStorage.user) {
-
-      $rootScope.currentUser = JSON.parse($window.localStorage.user);
-    }
-  }]);
-})();
-'use strict';
-
-angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$window", "$auth", function ($scope, $location, $window, $auth) {
-  $scope.isActive = function (viewLocation) {
-    return viewLocation === $location.path();
-  };
-
-  $scope.isAuthenticated = function () {
-    return $auth.isAuthenticated();
-  };
-
-  $scope.logout = function () {
-    $auth.logout();
-    delete $window.localStorage.user;
-    $location.path('/');
-  };
-}]);
-'use strict';
-
-(function () {
-    'use strict';
-
-    angular.module('app.layout').controller('HomeController', HomeController);
-
-    HomeController.$inject = ['$scope', '$auth'];
-    function HomeController($scope, $auth) {
-        var vm = this;
-
-        vm.isAuthenticated = isAuthenticated;
-
-        activate();
-
-        ////////////////
-
-        function activate() {}
-
-        function isAuthenticated() {
-            return $auth.isAuthenticated();
-        }
-    }
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
   angular.module('app.point-board').controller('PointController', PointController);
 
   PointController.$inject = ['$scope', '$timeout', '$q', 'Point', 'Account', 'Socket', 'Toast'];
@@ -341,6 +375,11 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
       givePoint: true,
       rockstar: true,
       dong: true
+    };
+
+    vm.buttonsDisabled = {
+      point: false,
+      vote: false
     };
 
     vm.popover = {
@@ -379,7 +418,6 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         setPoints();
       }).catch(function (response) {
         Toast.show('error', 'Error', response.data);
-        // setMsg(response.data, true);
       });
     }
 
@@ -389,7 +427,6 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         getLoggedInUsers();
       }).catch(function (response) {
         // Toast.show('error', 'Error', response.data);
-        // setMsg(response.data, true);
       });
     }
 
@@ -418,9 +455,10 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
      */
     function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
-        // setMsg({msg: 'You must select a user'}, true);
         Toast.show('error', 'Error', { msg: 'You must select a user' });
       } else {
+        vm.buttonsDisabled.point = true;
+        vm.buttonsDisabled.vote = true;
         var data = {
           pointType: pointType,
           toUser: toUser,
@@ -435,16 +473,45 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
           // Update userpoint list
           getUsersPoints();
           Toast.show('success', 'Success', userPoints.data);
-          // setMsg(userPoints.data, false);
+          vm.buttonsDisabled.point = false;
+          vm.buttonsDisabled.vote = false;
           vm.user = null;
           vm.message = null;
           vm.pointMessage = null;
         }).catch(function (response) {
           Toast.show('error', 'Error', response.data);
-          // setMsg(response.data, true);
+          vm.buttonsDisabled.point = false;
+          vm.buttonsDisabled.vote = false;
           vm.user = null;
         });
       }
+    }
+
+    /**
+     * REMOVE user point
+     */
+    function removeUserPoint(toUser, pointType, message) {
+      // var data = {
+      //   pointType: pointType,
+      //   toUser: toUser,
+      //   message: message
+      // };
+      vm.buttonsDisabled.vote = true;
+      Point.removePoint(toUser, pointType, { message: message }).then(function (userPoints) {
+        enrichRecent([userPoints.data.userVote]);
+        vm.recent.push(userPoints.data.userVote);
+        // emit point change
+        notifyPoint(userPoints.data.userVote);
+        // update dong/rockstar
+        getUsersPoints();
+        Toast.show('success', 'Success', userPoints.data);
+        vm.message = null;
+        vm.pointMessage = null;
+        vm.buttonsDisabled.vote = false;
+      }).catch(function (response) {
+        vm.buttonsDisabled.vote = false;
+        Toast.show('error', 'Error', response.data);
+      });
     }
 
     function messageVote(userVote, voteType) {
@@ -454,7 +521,6 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         // emit change
         notifyMessageVote(userVote, voteType);
       }).catch(function (response) {
-        // setMsg(response.data, true);
         Toast.show('error', 'Error', response.data);
       });
     }
@@ -468,32 +534,6 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
       target.upvote = src.upvote;
       target[voteType + 'Changed'] = true;
       setToFalse(target, voteType + 'Changed', 2000);
-    }
-
-    /**
-     * REMOVE user point
-     */
-    function removeUserPoint(toUser, pointType, message) {
-      // var data = {
-      //   pointType: pointType,
-      //   toUser: toUser,
-      //   message: message
-      // };
-      Point.removePoint(toUser, pointType, { message: message }).then(function (userPoints) {
-        enrichRecent([userPoints.data.userVote]);
-        vm.recent.push(userPoints.data.userVote);
-        // emit point change
-        notifyPoint(userPoints.data.userVote);
-        // update dong/rockstar
-        getUsersPoints();
-        // setMsg(userPoints.data, false);
-        Toast.show('success', 'Success', userPoints.data);
-        vm.message = null;
-        vm.pointMessage = null;
-      }).catch(function (response) {
-        // setMsg(response.data, true);
-        Toast.show('error', 'Error', response.data);
-      });
     }
 
     function setPoints() {
@@ -585,7 +625,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
     }
 
     function notifyMessageVote(userVote, voteType) {
-      Socket.emit('point:messageVote', { userVote: userVote, coteType: voteType });
+      Socket.emit('point:messageVote', { userVote: userVote, voteType: voteType });
     }
 
     function setToFalse(obj, prop, delay) {
@@ -629,6 +669,7 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
 
     /**
      * Someone upvoted or downvoted
+     * Update board and show toast message
      */
     Socket.on('point:newMessageVote', function (messageVote) {
       // loop through all recent and find userVote
@@ -636,7 +677,10 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
         if (currVote._id === messageVote.userVote._id) {
           // Set the userVote item to match the up/downvotes
           setUserVote(messageVote.userVote, currVote, messageVote.voteType);
-          Toast.show('note', 'New Message Vote', 'Another user voted on a message');
+          var type = messageVote.voteType === 'upvote' ? 'thumbs up' : 'thumbs down';
+          var title = 'New ' + type;
+          var message = messageVote.fromUser + ' gave a ' + type + ' to ' + messageVote.toUser;
+          Toast.show('note', title, message, 2000);
           return;
         }
       }, this);
@@ -676,6 +720,85 @@ angular.module('app.layout').controller('HeaderCtrl', ["$scope", "$location", "$
           user.loggedIn = false;
         }
       });
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.layout').controller('HeaderController', HeaderController);
+
+  HeaderController.$inject = ['$scope', '$location', '$window', '$auth'];
+  function HeaderController($scope, $location, $window, $auth) {
+    var vm = this;
+    vm.isActive = isActive;
+    vm.isAuthenticated = isAuthenticated;
+    vm.logout = logout;
+
+    activate();
+
+    ////////////////
+
+    function activate() {
+      vm.currentUser = $scope.currentUser;
+    }
+
+    function isActive(viewLocation) {
+      return viewLocation === $location.path();
+    }
+
+    function isAuthenticated() {
+      return $auth.isAuthenticated();
+    }
+
+    function logout() {
+      $auth.logout();
+      delete $window.localStorage.user;
+      $location.path('/');
+    }
+  }
+})();
+
+// angular.module('app.layout')
+//   .controller('HeaderCtrl', function($scope, $location, $window, $auth) {
+//     $scope.isActive = function (viewLocation) {
+//       return viewLocation === $location.path();
+//     };
+
+//     $scope.isAuthenticated = function() {
+//       return $auth.isAuthenticated();
+//     };
+
+//     $scope.logout = function() {
+//       $auth.logout();
+//       delete $window.localStorage.user;
+//       $location.path('/');
+//     };
+
+//   });
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.layout').controller('HomeController', HomeController);
+
+  HomeController.$inject = ['$scope', '$auth'];
+  function HomeController($scope, $auth) {
+    var vm = this;
+
+    vm.isAuthenticated = isAuthenticated;
+
+    activate();
+
+    ////////////////
+
+    function activate() {}
+
+    function isAuthenticated() {
+      return $auth.isAuthenticated();
     }
   }
 })();
@@ -823,13 +946,14 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
         return service;
 
         ////////////////
-        function show(type, title, messages) {
+        function show(type, title, messages, timeout) {
             /**
              * Format for error messages, only msg param is used.
              * Can also just pass in object with msg field without being wrapped in array
              * @param body = [{ param: 'urlparam', msg: 'Invalid urlparam', value: 't1est' } ]]
              */
             type = type || 'success';
+            timeout = timeout || 5000;
             // Ensure valid type
             if (!['success', 'warning', 'error', 'wait', 'note'].includes(type)) {
                 type = 'success';
@@ -847,7 +971,14 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
                 }
                 text += '</ul>';
             });
-            toaster.pop(type, title, text, null, 'trustedHtml');
+            // toaster.pop(type, title, text, null, 'trustedHtml');
+            toaster.pop({
+                type: type,
+                title: title,
+                body: text,
+                bodyOutputType: 'trustedHtml',
+                timeout: timeout
+            });
         }
     }
 })();
@@ -937,7 +1068,11 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     vm.updateProfile = updateProfile;
     vm.changePassword = changePassword;
     vm.deleteAccount = deleteAccount;
-
+    vm.buttonEnabled = {
+      profile: true,
+      password: true,
+      delete: true
+    };
     activate();
 
     ////////////////
@@ -947,30 +1082,37 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     }
 
     function updateProfile() {
+      vm.buttonEnabled.profile = false;
       delete vm.profile.password;
       Account.updateProfile(vm.profile).then(function (response) {
+        vm.buttonEnabled.profile = true;
         $rootScope.currentUser = response.data.user;
         $window.localStorage.user = JSON.stringify(response.data.user);
         Toast.show('success', 'Success', response.data);
       }).catch(function (response) {
+        vm.buttonEnabled.profile = true;
         Toast.show('error', 'Error', response.data);
       });
     }
 
     function changePassword(password, confirm) {
+      vm.buttonEnabled.password = false;
       vm.profile.password = password || null;
       vm.profile.confirm = confirm || null;
       Account.changePassword(vm.profile).then(function (response) {
+        vm.buttonEnabled.password = true;
         Toast.show('success', 'Success', response.data);
 
         delete vm.password;
         delete vm.confirm;
       }).catch(function (response) {
+        vm.buttonEnabled.password = true;
         Toast.show('error', 'Error', response.data);
       });
     }
 
     function deleteAccount() {
+      vm.buttonEnabled.password = false;
       Modal.open('Are you sure?', 'Would you really like to delete your account?', { confirm: 'Yes, delete my account', cancel: 'No, keep my account' }).result.then(function (data) {
         // User confirmed, delete account
         Account.deleteAccount().then(function () {
@@ -979,9 +1121,11 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
           $location.path('/');
           Toast.show('warning', 'Success', 'Account was successfully deleted');
         }).catch(function (response) {
+          vm.buttonEnabled.password = true;
           Toast.show('error', 'Error', response.data);
         });
       }, function (data) {
+        vm.buttonEnabled.password = true;
         console.log('data', data);
       });
     }

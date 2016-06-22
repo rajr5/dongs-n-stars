@@ -13,7 +13,8 @@
         })
         .when('/login', {
           templateUrl: 'auth/login.html',
-          controller: 'LoginCtrl',
+          controller: 'LoginController',
+          controllerAs: 'vm',
           resolve: { skipIfAuthenticated: skipIfAuthenticated }
         })
         .when('/signup', {
@@ -24,7 +25,8 @@
         })
         .when('/forgot', {
           templateUrl: 'auth/forgot.html',
-          controller: 'ForgotCtrl',
+          controller: 'ForgotController',
+          controllerAs: 'vm',
           resolve: { skipIfAuthenticated: skipIfAuthenticated }
         })
         .when('/reset', {
@@ -78,7 +80,6 @@
     })
     .run(function($rootScope, $window) {
       if ($window.localStorage.user) {
-
         $rootScope.currentUser = JSON.parse($window.localStorage.user);
       }
   });
