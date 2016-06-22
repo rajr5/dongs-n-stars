@@ -1,7 +1,5 @@
 var statService = require('../services/stats.js');
 
-MAX_VOTES = 5;
-
 /**
  * 200 - OK success GET
  * 201 - created success POST

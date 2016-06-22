@@ -40,15 +40,9 @@ Run either 'npm start
   "showOutput": "always",
   "tasks": [
     {
-      "taskName": "build",
-      "args": [],
-      "isBuildCommand": true,
-      "isWatching": false
-    },
-    {
       "taskName": "default",
       "args": [],
-      "isBuildCommand": false,
+      "isBuildCommand": true,
       "isWatching": true
     }
   ]

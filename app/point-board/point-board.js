@@ -22,6 +22,19 @@
       rockstar: true,
       dong: true
     };
+    
+    vm.buttonsDisabled = {
+      point: false,
+      vote: false
+    };
+
+    vm.popover = {
+      addDong: 'point-board/popover-templates/add-dong.html',
+      addRockstar: 'point-board/popover-templates/add-rockstar.html',
+      removeDong: 'point-board/popover-templates/remove-dong.html',
+      removeRockstar: 'point-board/popover-templates/remove-rockstar.html'
+    }
+
     vm.showRecentActivity = true;
 
     vm.setPointType = setPointType;
@@ -53,7 +66,6 @@
       })
       .catch(function(response){
         Toast.show('error', 'Error', response.data);
-        // setMsg(response.data, true);
       });
     }
 
@@ -65,7 +77,6 @@
       })
       .catch(function(response){
         // Toast.show('error', 'Error', response.data);
-        // setMsg(response.data, true);
       });
     }
 
@@ -96,14 +107,16 @@
      */
     function createUserPoint(toUser, pointType, message) {
       if (!toUser) {
-        // setMsg({msg: 'You must select a user'}, true);
         Toast.show('error', 'Error', {msg: 'You must select a user'});
       } else {
+        vm.buttonsDisabled.point = true;
+        vm.buttonsDisabled.vote = true;
         var data = {
           pointType: pointType,
           toUser: toUser,
           message: message
         };
+        
         Point.createPoint(data)
         .then(function(userPoints) {
           enrichRecent([userPoints.data.userVote]);
@@ -113,18 +126,49 @@
           // Update userpoint list
           getUsersPoints();
           Toast.show('success', 'Success', userPoints.data);
-          // setMsg(userPoints.data, false);
+          vm.buttonsDisabled.point = false;
+          vm.buttonsDisabled.vote = false;
           vm.user = null;
           vm.message = null;
+          vm.pointMessage = null;
         })
         .catch(function(response){
           Toast.show('error', 'Error', response.data);
-          // setMsg(response.data, true);
+          vm.buttonsDisabled.point = false;
+          vm.buttonsDisabled.vote = false;
           vm.user = null;
         });
       }
     }
 
+    /**
+     * REMOVE user point
+     */
+    function removeUserPoint(toUser, pointType, message) {
+      // var data = {
+      //   pointType: pointType,
+      //   toUser: toUser,
+      //   message: message
+      // };
+      vm.buttonsDisabled.vote = true;
+      Point.removePoint(toUser, pointType, {message: message})
+      .then(function(userPoints) {
+        enrichRecent([userPoints.data.userVote]);
+        vm.recent.push(userPoints.data.userVote);
+        // emit point change
+        notifyPoint(userPoints.data.userVote);
+        // update dong/rockstar
+        getUsersPoints();
+        Toast.show('success', 'Success', userPoints.data);
+        vm.message = null;
+        vm.pointMessage = null;
+        vm.buttonsDisabled.vote = false;
+      })
+      .catch(function(response){
+        vm.buttonsDisabled.vote = false;
+        Toast.show('error', 'Error', response.data);
+      });
+    }
 
     function messageVote(userVote, voteType) {
       Point.messageVote(userVote._id, voteType)
@@ -135,7 +179,6 @@
         notifyMessageVote(userVote, voteType);
       })
       .catch(function(response) {
-        // setMsg(response.data, true);
         Toast.show('error', 'Error', response.data);
       });
     }
@@ -151,34 +194,6 @@
       setToFalse(target, voteType+'Changed', 2000);
     }
 
-    /**
-     * REMOVE user point
-     */
-    function removeUserPoint(toUser, pointType) {
-      var data = {
-        pointType: pointType,
-        toUser: toUser
-      };
-      Point.removePoint(toUser, pointType)
-      .then(function(userPoints) {
-        enrichRecent([userPoints.data.userVote]);
-        vm.recent.push(userPoints.data.userVote);
-        // emit point change
-        notifyPoint(userPoints.data.userVote);
-        // update dong/rockstar
-        getUsersPoints();
-        // setMsg(userPoints.data, false);
-        Toast.show('success', 'Success', userPoints.data);
-        
-        
-      })
-      .catch(function(response){
-        // setMsg(response.data, true);
-        Toast.show('error', 'Error', response.data);
-        
-        
-      });
-    }
 
     function setPoints() {
       vm.dongs = [];
@@ -275,7 +290,7 @@
     }
 
     function notifyMessageVote(userVote, voteType) {
-      Socket.emit('point:messageVote', {userVote: userVote, coteType: voteType});
+      Socket.emit('point:messageVote', {userVote: userVote, voteType: voteType});
     }
 
     function setToFalse(obj, prop, delay) {
@@ -320,6 +335,7 @@
 
     /**
      * Someone upvoted or downvoted
+     * Update board and show toast message
      */
     Socket.on('point:newMessageVote', function(messageVote) {
       // loop through all recent and find userVote
@@ -327,7 +343,10 @@
         if (currVote._id === messageVote.userVote._id) {
           // Set the userVote item to match the up/downvotes
           setUserVote(messageVote.userVote, currVote, messageVote.voteType);
-          Toast.show('note', 'New Message Vote', 'Another user voted on a message');
+          var type = messageVote.voteType === 'upvote' ? 'thumbs up' : 'thumbs down';
+          var title = 'New ' + type;
+          var message = messageVote.fromUser + ' gave a ' + type + ' to ' + messageVote.toUser;
+          Toast.show('note', title, message, 2000);
           return;
         }
       }, this);

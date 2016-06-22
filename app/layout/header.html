@@ -1,4 +1,4 @@
-<nav ng-controller="HeaderCtrl" class="navbar navbar-default navbar-static-top">
+<nav ng-controller="HeaderController as vm" class="navbar navbar-default navbar-static-top">
   <div class="container">
     <div class="navbar-header">
       <button type="button" data-toggle="collapse" data-target="#navbar" class="navbar-toggle collapsed">
@@ -11,26 +11,26 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li ng-class="{ active: isActive('/')}"><a href="/">Home</a></li>
-        <li ng-show="isAuthenticated()" ng-class="{ active: isActive('/pointBoard')}"><a href="/pointBoard">Point Board</a></li>
-        <!--<li ng-class="{ active: isActive('/allActivity')}"><a href="/allActivity">All Activity</a></li>-->
-        <li ng-show="isAuthenticated()" ng-class="{ active: isActive('/stats')}"><a href="/stats">Stats</a></li>
+        <li ng-class="{ active: vm.isActive('/')}"><a href="/">Home</a></li>
+        <li ng-show="vm.isAuthenticated()" ng-class="{ active: vm.isActive('/pointBoard')}"><a href="/pointBoard">Point Board</a></li>
+        <!--<li ng-class="{ active: vm.isActive('/allActivity')}"><a href="/allActivity">All Activity</a></li>-->
+        <li ng-show="vm.isAuthenticated()" ng-class="{ active: vm.isActive('/stats')}"><a href="/stats">Stats</a></li>
       </ul>
-      <ul ng-if="isAuthenticated()" class="nav navbar-nav navbar-right">
+      <ul ng-if="vm.isAuthenticated()" class="nav navbar-nav navbar-right">
         <li class="dropdown">
           <a href="#" data-toggle="dropdown" class="navbar-avatar dropdown-toggle">
-            <img ng-src="{{currentUser.picture || currentUser.gravatar}}"> {{currentUser.name || currentUser.email || currentUser.id}} <i class="caret"></i>
+            <img ng-src="{{vm.currentUser.picture || vm.currentUser.gravatar}}"> {{vm.currentUser.name || vm.currentUser.email || vm.currentUser.id}} <i class="caret"></i>
           </a>
           <ul class="dropdown-menu">
             <li><a href="/account">My Account</a></li>
             <li class="divider"></li>
-            <li><a href="#" ng-click="logout()"}>Logout</a></li>
+            <li><a href="#" ng-click="vm.logout()"}>Logout</a></li>
           </ul>
         </li>
       </ul>
-      <ul ng-if="!isAuthenticated()" class="nav navbar-nav navbar-right">
-        <li ng-class="{ active: isActive('/login')}"><a href="/login">Log in</a></li>
-        <li ng-class="{ active: isActive('/signup')}"><a href="/signup">Sign up</a></li>
+      <ul ng-if="!vm.isAuthenticated()" class="nav navbar-nav navbar-right">
+        <li ng-class="{ active: vm.isActive('/login')}"><a href="/login">Log in</a></li>
+        <li ng-class="{ active: vm.isActive('/signup')}"><a href="/signup">Sign up</a></li>
       </ul>
     </div>
   </div>

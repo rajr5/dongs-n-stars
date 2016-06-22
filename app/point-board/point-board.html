@@ -70,7 +70,7 @@
                       </div>
                     </spav>
                     <span class="pull-right" style="padding-right:25px;">
-                      <button type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType, vm.message)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
+                      <button ng-disabled="vm.buttonsDisabled.point" type="button" ng-click="vm.createUserPoint(vm.user, vm.pointType, vm.message)" class="btn btn-primary">Submit {{vm.pointType}} point</button>
                     </span>
                   </form>
                 </div> <!-- end row -->
@@ -138,7 +138,7 @@
                           uib-popover="{{recent.message}}"
                           popover-trigger="mouseenter click"
                           popover-placement="bottom-right"
-                          popover-popup-close-delay="500"
+                          popover-popup-close-delay="100"
                           popover-title="Message"
                           class="glyphicon glyphicon-comment text-primary"
                           style="padding-right: 10px"
@@ -189,8 +189,20 @@
                   <td>{{point.name}}<br/>({{point.email}})</td>
                   <td>{{point.count}}</td>
                   <td>
-                    <span ng-click="vm.createUserPoint(point.toUser, 'dong')" class="btn btn-warning btn-xs">Add</span> |
-                    <span ng-click="vm.removeUserPoint(point.toUser, 'dong')" class="btn btn-info btn-xs">Remove</span>
+                    <!--<span ng-click="vm.createUserPoint(point.toUser, 'dong')" class="btn btn-warning btn-xs">Add</span> |-->
+                    <span
+                      uib-popover-template="vm.popover.addDong"
+                      popover-trigger="click"
+                      popover-placement="top-right"
+                      popover-title="Add Point"
+                      class="btn btn-warning btn-xs">Add</span> |
+                    <span
+                      uib-popover-template="vm.popover.removeDong"
+                      popover-trigger="click"
+                      popover-placement="top-right"
+                      popover-title="Remove Point"
+                      class="btn btn-info btn-xs">Remove</span>
+                    <!--<span ng-click="vm.removeUserPoint(point.toUser, 'dong')" class="btn btn-info btn-xs">Remove</span>-->
                   </td>
                 </tr>
               </tbody>
@@ -239,8 +251,20 @@
                     <td>{{point.name}}<br/>({{point.email}})</td>
                     <td>{{point.count}}</td>
                     <td>
-                      <span ng-click="vm.createUserPoint(point.toUser, 'rockstar')" class="btn btn-warning btn-xs">Add</span> |
-                      <span ng-click="vm.removeUserPoint(point.toUser, 'rockstar')" class="btn btn-info btn-xs">Remove</span>
+                      <!--<span ng-click="vm.createUserPoint(point.toUser, 'rockstar')" class="btn btn-warning btn-xs">Add</span> |
+                      <span ng-click="vm.removeUserPoint(point.toUser, 'rockstar')" class="btn btn-info btn-xs">Remove</span>-->
+                    <span
+                      uib-popover-template="vm.popover.addRockstar"
+                      popover-trigger="click"
+                      popover-placement="top-right"
+                      popover-title="Add Point"
+                      class="btn btn-warning btn-xs">Add</span> |
+                    <span
+                      uib-popover-template="vm.popover.removeRockstar"
+                      popover-trigger="click"
+                      popover-placement="top-right"
+                      popover-title="Remove Point"
+                      class="btn btn-info btn-xs">Remove</span>
                     </td>
                   </tr>
                 </tbody>

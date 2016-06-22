@@ -14,13 +14,14 @@
         return service;
 
         ////////////////
-        function show(type, title, messages) {
+        function show(type, title, messages, timeout) {
             /**
              * Format for error messages, only msg param is used.
              * Can also just pass in object with msg field without being wrapped in array
              * @param body = [{ param: 'urlparam', msg: 'Invalid urlparam', value: 't1est' } ]]
              */
             type = type || 'success';
+            timeout = timeout || 5000;
             // Ensure valid type
             if (!['success', 'warning', 'error', 'wait','note'].includes(type)) {
                 type = 'success';
@@ -38,7 +39,14 @@
                 }
                 text += '</ul>';
             });
-            toaster.pop(type, title, text, null, 'trustedHtml');
+            // toaster.pop(type, title, text, null, 'trustedHtml');
+            toaster.pop({
+                type: type,
+                title: title,
+                body: text,
+                bodyOutputType: 'trustedHtml',
+                timeout: timeout
+            });
          }
     }
 })();

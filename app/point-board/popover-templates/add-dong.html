@@ -1,0 +1,13 @@
+<div>
+    <textarea 
+        ng-model="vm.pointMessage" 
+        class="form-control" 
+        rows="4" 
+        placeholder="Message">
+    </textarea>
+
+    <button
+        ng-disabled="vm.buttonsDisabled.vote"
+        ng-click="vm.createUserPoint(point.toUser, 'dong', vm.pointMessage)" 
+        class="btn btn-warning btn-xs">Give Point</button>
+</div>
