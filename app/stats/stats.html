@@ -14,7 +14,7 @@
 
             <ul class="list-item-group">
               <h2 class="center-block"><small class="text-danger">{{vm.names.dong}}</small></h2>
-              <div ng-show="!value.rockstars">
+              <div ng-show="value.rockstars.length === 0">
                 <h1><small>Sorry mate, no {{vm.names.dong}} fit the bill</small></h1>
               </div>
               <div>
@@ -42,8 +42,8 @@
           <div class="col-md-6 col-sm-12">
             <ul class="list-item-group">
               <h2 class="center-block"><small class="text-success">{{vm.names.rockstar}}</small></h2>
-              <div ng-show="!value.rockstars">
-                <h1><small>Ahoy matey, no {{vm.names.rockstar}} fit the bill</small></h1>
+              <div ng-show="value.rockstars.length === 0">
+                <h1><small>Ahoy matey, no {{vm.names.rockstar}} be in existence</small></h1>
               </div>
               <li
                 ng-repeat="entry in value.rockstars | orderBy: '-rockstars.length'"
