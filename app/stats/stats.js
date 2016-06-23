@@ -15,6 +15,11 @@
     //   rockstars: []
     // }
     vm.mostPoints = {};
+    vm.names = {
+      dong: 'Dong Miesters',
+      rockstar: 'Rockstars'
+    };
+
     vm.loading = {
       loading: true,
       error: null,
@@ -71,14 +76,14 @@
 
     function getMessagesHtml(pointArray) {
       var hasMsg = false;
-      var html = '<ul style=" padding-left:5px;">';
+      var html = '<ol style=" padding-left:5px;">';
       pointArray.forEach(function(element) {
         if (element.message) {
           hasMsg = true;
           html += '<li>'+element.message+'</li>';
         }
       });
-      html += '</ul>';
+      html += '</ol>';
       if (hasMsg) {
         return $sce.trustAsHtml(html);
       } else {
