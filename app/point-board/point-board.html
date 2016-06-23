@@ -21,7 +21,11 @@
             </div>
               <div class="panel-body" ng-show="vm.show.givePoint" style="overflow-y: scroll; min-height: 350px; max-height: 450px;">
                 <div class="Column">
+                  <div class="row" style="padding-top: 15px" ng-show="vm.loading.users">
+                    <uib-progressbar type="{{vm.loading.error}}" class="progress-striped" ng-class="{active: vm.loading.animate}" max="100" value="100">
+                  </div>
                 <div class="row" style="max-height:350px;">
+
                   <ul class="list-group">
                     <a class="list-group-item"
                     ng-repeat="user in vm.users | orderBy: 'name'"
@@ -103,6 +107,9 @@
                 class="panel-body"
                 ng-show="vm.show.recentActivity"
                 style="height: 510px; overflow-y: scroll; overflow-x: none;">
+                  <div class="row" style="padding-top: 15px" ng-show="vm.loading.recent">
+                    <uib-progressbar type="{{vm.loading.error}}" class="progress-striped" ng-class="{active: vm.loading.animate}" max="100" value="100">
+                  </div>
                 <ul class="list-group">
                   <li class="list-group-item"
                       ng-repeat="recent in vm.recent | orderBy: '-voteDate' track by $index"
@@ -175,6 +182,9 @@
             </div>
         </div>
         <div class="panel-body" ng-show="vm.show.dong">
+          <div class="row" style="padding-top: 15px" ng-show="vm.loading.dongs">
+            <uib-progressbar type="{{vm.loading.error}}" class="progress-striped" ng-class="{active: vm.loading.animate}" max="100" value="100">
+          </div>
           <div class="table-responsive">
             <table class="table table-striped">
               <thead>
@@ -231,11 +241,8 @@
             </div>
           </div>
           <div class="panel-body" ng-show="vm.show.rockstar">
-            <div ng-if="messages.error" role="alert" class="alert alert-danger">
-              <div ng-repeat="error in messages.error">{{error.msg}}</div>
-            </div>
-            <div ng-if="messages.success" role="alert" class="alert alert-success">
-              <div ng-repeat="success in messages.success">{{success.msg}}</div>
+            <div class="row" style="padding-top: 15px" ng-show="vm.loading.rockstars">
+              <uib-progressbar type="{{vm.loading.error}}" class="progress-striped" ng-class="{active: vm.loading.animate}" max="100" value="100">
             </div>
             <div class="table-responsive">
               <table class="table table-striped">

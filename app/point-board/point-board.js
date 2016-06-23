@@ -22,7 +22,14 @@
       rockstar: true,
       dong: true
     };
-    
+    vm.loading = {
+      users: true,
+      recent: true,
+      dongs: true,
+      rockstars: true,
+      error: null,
+      animate: true
+    };
     vm.buttonsDisabled = {
       point: false,
       vote: false
@@ -48,35 +55,82 @@
 
     activate();
 
-    ////////////////
+    //////////////// FUNCTIONS /////////////////////////
 
     function activate() {
       vm.currentUser = $scope.currentUser;
-      getUsersPoints();
-      getRecent();
-      getUsers();
+
+      getUsersPoints().then(function(){
+        vm.loading.dongs = false;
+        vm.loading.rockstars = false;
+      }, function(){
+        setLoadError();
+      });
+
+      getRecent().then(function(){
+        vm.loading.recent = false;
+      }, function(){
+        setLoadError();
+      });
+
+      getUsers().then(function(){
+        vm.loading.users = false;
+      }, function(){
+        setLoadError();
+      });
+
       notifyLoggedIn(vm.currentUser);
     }
 
+    function setLoadError() {
+      vm.loading.error = 'danger';
+      vm.loading.animate = false;
+    }
+
+
     function getUsersPoints() {
-      Point.getUsersPoints()
-      .then(function(userPoints) {
-        vm.userPoints = userPoints.data.userPoints;
-        setPoints();
-      })
-      .catch(function(response){
-        Toast.show('error', 'Error', response.data);
+      return $q(function(resolve, reject){
+        Point.getUsersPoints()
+        .then(function(userPoints) {
+          vm.userPoints = userPoints.data.userPoints;
+          setPoints();
+          resolve();
+        })
+        .catch(function(response){
+          Toast.show('error', 'Error', response.data);
+          reject();
+        });
       });
     }
 
     function getUsers() {
-      Account.getUsers()
-      .then(function(users) {
-        vm.users = users.data;
-        getLoggedInUsers();
-      })
-      .catch(function(response){
-        // Toast.show('error', 'Error', response.data);
+      return $q(function(resolve, reject){
+        Account.getUsers()
+        .then(function(users) {
+          vm.users = users.data;
+          getLoggedInUsers();
+          resolve();
+        })
+        .catch(function(response){
+          reject();
+        });
+      });
+    }
+
+    function getRecent() {
+      return $q(function(resolve, reject){
+        vm.recent = [];
+        // get recent
+        // update recent obj
+        Point.getUserVotes()
+        .then(function(recent) {
+          enrichRecent(recent.data.userVotes);
+          vm.recent = recent.data.userVotes;
+          resolve();
+        })
+        .catch(function(err){
+          reject();
+        });
       });
     }
 
@@ -116,7 +170,7 @@
           toUser: toUser,
           message: message
         };
-        
+
         Point.createPoint(data)
         .then(function(userPoints) {
           enrichRecent([userPoints.data.userVote]);
@@ -184,7 +238,7 @@
     }
 
     /**
-     * Helper function to set user vote and 
+     * Helper function to set user vote and
      * have the change event fire
      */
     function setUserVote(src, target, voteType) {
@@ -200,20 +254,6 @@
       vm.rockstars = [];
       setDongs(vm.userPoints);
       setRockstars(vm.userPoints);
-    }
-
-    function getRecent() {
-      vm.recent = [];
-      // get recent
-      // update recent obj
-      Point.getUserVotes()
-      .then(function(recent) {
-
-        enrichRecent(recent.data.userVotes);
-        vm.recent = recent.data.userVotes;
-      })
-      .catch(function(err){
-      });
     }
 
     function enrichRecent(userVotes) {
