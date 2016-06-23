@@ -12,31 +12,39 @@
         <div class="column">
           <div class="col-md-6 col-sm-12">
 
-            <ol class="list-item-group">
-              <h2 class="center-block"><small class="text-danger">Dong Miesters</small></h2>
-              <li
-                ng-repeat="entry in value.dongs | orderBy: '-dongs.length'"
-                class="list-group-item">
-                <span
-                  class="badge"
-                  uib-popover-html="entry.messages"
-                  popover-trigger="mouseenter click"
-                  popover-placement="bottom-right"
-                  popover-enable="entry.messages"
-                  popover-title="Comments">
-                {{entry.dongs.length}}</span>
-                <span
-                  uib-tooltip="{{entry.user.email}}"
-                  tooltip-placement="bottom"
-                  tooltip-popup-delay="200">
-                  {{entry.user.name}}
-                </span>
-              </li>
-            </ol>
+            <ul class="list-item-group">
+              <h2 class="center-block"><small class="text-danger">{{vm.names.dong}}</small></h2>
+              <div ng-show="!value.rockstars">
+                <h1><small>Sorry mate, no {{vm.names.dong}} fit the bill</small></h1>
+              </div>
+              <div>
+                <li
+                  ng-repeat="entry in value.dongs | orderBy: '-dongs.length'"
+                  class="list-group-item">
+                  <span
+                    class="badge"
+                    uib-popover-html="entry.messages"
+                    popover-trigger="mouseenter click"
+                    popover-placement="bottom-right"
+                    popover-enable="entry.messages"
+                    popover-title="Comments">
+                  {{entry.dongs.length}}</span>
+                  <span
+                    uib-tooltip="{{entry.user.email}}"
+                    tooltip-placement="bottom"
+                    tooltip-popup-delay="200">
+                    {{entry.user.name}}
+                  </span>
+                </li>
+              </div>
+            </ul>
           </div>
           <div class="col-md-6 col-sm-12">
-            <ol class="list-item-group">
-              <h2 class="center-block"><small class="text-success">Rockstars</small></h2>
+            <ul class="list-item-group">
+              <h2 class="center-block"><small class="text-success">{{vm.names.rockstar}}</small></h2>
+              <div ng-show="!value.rockstars">
+                <h1><small>Ahoy matey, no {{vm.names.rockstar}} fit the bill</small></h1>
+              </div>
               <li
                 ng-repeat="entry in value.rockstars | orderBy: '-rockstars.length'"
                 class="list-group-item">
@@ -56,7 +64,7 @@
                   {{entry.user.name}}
                 </span>
               </li>
-            </ol>
+            </ul>
           </div>
         </div>
       </uib-accordion-group>

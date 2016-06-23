@@ -31,13 +31,6 @@
 (function () {
   'use strict';
 
-  angular.module('app.services', []);
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
   angular.module('app.layout', []);
 })();
 'use strict';
@@ -53,6 +46,13 @@
   'use strict';
 
   angular.module('app.point-board', []);
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.services', []);
 })();
 'use strict';
 
@@ -351,186 +351,6 @@
       $rootScope.currentUser = JSON.parse($window.localStorage.user);
     }
   }]);
-})();
-'use strict';
-
-angular.module('app.services').factory('Account', ["$http", function ($http) {
-  return {
-    updateProfile: function updateProfile(data) {
-      return $http.put('/api/account', data);
-    },
-    changePassword: function changePassword(data) {
-      return $http.put('/api/account', data);
-    },
-    deleteAccount: function deleteAccount() {
-      return $http.delete('/api/account');
-    },
-    forgotPassword: function forgotPassword(data) {
-      return $http.post('/api/forgot', data);
-    },
-    resetPassword: function resetPassword(token, data) {
-      return $http.post('/api/reset/' + token, data);
-    },
-    activateAccount: function activateAccount(token, data) {
-      return $http.post('/api/activate/' + token, data);
-    },
-    getUsers: function getUsers(data) {
-      return $http.get('/api/users', data);
-    }
-  };
-}]);
-'use strict';
-
-angular.module('app.services').factory('Point', ["$http", function ($http) {
-  return {
-    getUsersPoints: function getUsersPoints(query) {
-      var options = {};
-      options.params = query;
-      return $http.get('/api/userPoints', options);
-    },
-    getUserPoints: function getUserPoints(id, query) {
-      var options = {};
-      options.params = query;
-      return $http.get('/api/userPoints/' + id, options);
-    },
-    getUserVotes: function getUserVotes(id, query) {
-      var options = {};
-      options.params = query;
-      return $http.get('/api/userVotes', options);
-    },
-    createPoint: function createPoint(data) {
-      return $http.post('/api/point', data);
-    },
-    messageVote: function messageVote(userVoteId, voteType) {
-      return $http.put('/api/userVotes/' + userVoteId + '/' + voteType);
-    },
-    removePoint: function removePoint(toUser, pointType, query) {
-      var options = {};
-      options.params = query || {};
-      return $http.delete('/api/point/' + toUser + '/' + pointType, options);
-    }
-  };
-}]);
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.services').factory('Socket', Socket);
-
-  Socket.$inject = ['$rootScope'];
-  function Socket($rootScope) {
-
-    var socket = io.connect();
-
-    var service = {
-      on: on,
-      emit: emit,
-      disconnect: disconnect
-    };
-
-    return service;
-
-    ////////////////
-    function on(eventName, callback) {
-      socket.on(eventName, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
-    }
-
-    function emit(eventName, data, callback) {
-      socket.emit(eventName, data, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          if (callback) {
-            callback.apply(socket, args);
-          }
-        });
-      });
-    }
-
-    function disconnect(eventName, data, callback) {
-      socket.disconnect();
-    }
-  }
-})();
-'use strict';
-
-(function () {
-  'use strict';
-
-  angular.module('app.services').factory('Stats', Stats);
-
-  Stats.$inject = ['$http'];
-  function Stats($http) {
-    var service = {
-      getStats: getStats
-    };
-
-    return service;
-
-    ////////////////
-    function getStats(query) {
-      var options = {};
-      options.params = query;
-      return $http.get('/api/stats', options);
-    }
-  }
-})();
-'use strict';
-
-(function () {
-    'use strict';
-
-    angular.module('app.services').factory('Toast', ToasterService);
-
-    ToasterService.$inject = ['toaster'];
-    function ToasterService(toaster) {
-        var service = {
-            show: show
-        };
-
-        return service;
-
-        ////////////////
-        function show(type, title, messages, timeout) {
-            /**
-             * Format for error messages, only msg param is used.
-             * Can also just pass in object with msg field without being wrapped in array
-             * @param body = [{ param: 'urlparam', msg: 'Invalid urlparam', value: 't1est' } ]]
-             */
-            type = type || 'success';
-            timeout = timeout || 5000;
-            // Ensure valid type
-            if (!['success', 'warning', 'error', 'wait', 'note'].includes(type)) {
-                type = 'success';
-            }
-            if (!Array.isArray(messages)) {
-                messages = [messages];
-            }
-            var text = '';
-            messages.map(function (msg) {
-                text += '<ul style="list-style: none; padding-left:0;">';
-                if (msg.msg) {
-                    text += '<li>' + msg.msg + '</li>';
-                } else if (typeof msg === 'string') {
-                    text += '<li>' + msg + '</li>';
-                }
-                text += '</ul>';
-            });
-            // toaster.pop(type, title, text, null, 'trustedHtml');
-            toaster.pop({
-                type: type,
-                title: title,
-                body: text,
-                bodyOutputType: 'trustedHtml',
-                timeout: timeout
-            });
-        }
-    }
 })();
 'use strict';
 
@@ -1024,6 +844,186 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 })();
 'use strict';
 
+angular.module('app.services').factory('Account', ["$http", function ($http) {
+  return {
+    updateProfile: function updateProfile(data) {
+      return $http.put('/api/account', data);
+    },
+    changePassword: function changePassword(data) {
+      return $http.put('/api/account', data);
+    },
+    deleteAccount: function deleteAccount() {
+      return $http.delete('/api/account');
+    },
+    forgotPassword: function forgotPassword(data) {
+      return $http.post('/api/forgot', data);
+    },
+    resetPassword: function resetPassword(token, data) {
+      return $http.post('/api/reset/' + token, data);
+    },
+    activateAccount: function activateAccount(token, data) {
+      return $http.post('/api/activate/' + token, data);
+    },
+    getUsers: function getUsers(data) {
+      return $http.get('/api/users', data);
+    }
+  };
+}]);
+'use strict';
+
+angular.module('app.services').factory('Point', ["$http", function ($http) {
+  return {
+    getUsersPoints: function getUsersPoints(query) {
+      var options = {};
+      options.params = query;
+      return $http.get('/api/userPoints', options);
+    },
+    getUserPoints: function getUserPoints(id, query) {
+      var options = {};
+      options.params = query;
+      return $http.get('/api/userPoints/' + id, options);
+    },
+    getUserVotes: function getUserVotes(id, query) {
+      var options = {};
+      options.params = query;
+      return $http.get('/api/userVotes', options);
+    },
+    createPoint: function createPoint(data) {
+      return $http.post('/api/point', data);
+    },
+    messageVote: function messageVote(userVoteId, voteType) {
+      return $http.put('/api/userVotes/' + userVoteId + '/' + voteType);
+    },
+    removePoint: function removePoint(toUser, pointType, query) {
+      var options = {};
+      options.params = query || {};
+      return $http.delete('/api/point/' + toUser + '/' + pointType, options);
+    }
+  };
+}]);
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.services').factory('Socket', Socket);
+
+  Socket.$inject = ['$rootScope'];
+  function Socket($rootScope) {
+
+    var socket = io.connect();
+
+    var service = {
+      on: on,
+      emit: emit,
+      disconnect: disconnect
+    };
+
+    return service;
+
+    ////////////////
+    function on(eventName, callback) {
+      socket.on(eventName, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    }
+
+    function emit(eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      });
+    }
+
+    function disconnect(eventName, data, callback) {
+      socket.disconnect();
+    }
+  }
+})();
+'use strict';
+
+(function () {
+  'use strict';
+
+  angular.module('app.services').factory('Stats', Stats);
+
+  Stats.$inject = ['$http'];
+  function Stats($http) {
+    var service = {
+      getStats: getStats
+    };
+
+    return service;
+
+    ////////////////
+    function getStats(query) {
+      var options = {};
+      options.params = query;
+      return $http.get('/api/stats', options);
+    }
+  }
+})();
+'use strict';
+
+(function () {
+    'use strict';
+
+    angular.module('app.services').factory('Toast', ToasterService);
+
+    ToasterService.$inject = ['toaster'];
+    function ToasterService(toaster) {
+        var service = {
+            show: show
+        };
+
+        return service;
+
+        ////////////////
+        function show(type, title, messages, timeout) {
+            /**
+             * Format for error messages, only msg param is used.
+             * Can also just pass in object with msg field without being wrapped in array
+             * @param body = [{ param: 'urlparam', msg: 'Invalid urlparam', value: 't1est' } ]]
+             */
+            type = type || 'success';
+            timeout = timeout || 5000;
+            // Ensure valid type
+            if (!['success', 'warning', 'error', 'wait', 'note'].includes(type)) {
+                type = 'success';
+            }
+            if (!Array.isArray(messages)) {
+                messages = [messages];
+            }
+            var text = '';
+            messages.map(function (msg) {
+                text += '<ul style="list-style: none; padding-left:0;">';
+                if (msg.msg) {
+                    text += '<li>' + msg.msg + '</li>';
+                } else if (typeof msg === 'string') {
+                    text += '<li>' + msg + '</li>';
+                }
+                text += '</ul>';
+            });
+            // toaster.pop(type, title, text, null, 'trustedHtml');
+            toaster.pop({
+                type: type,
+                title: title,
+                body: text,
+                bodyOutputType: 'trustedHtml',
+                timeout: timeout
+            });
+        }
+    }
+})();
+'use strict';
+
 (function () {
   'use strict';
 
@@ -1039,6 +1039,11 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
     //   rockstars: []
     // }
     vm.mostPoints = {};
+    vm.names = {
+      dong: 'Dong Miesters',
+      rockstar: 'Rockstars'
+    };
+
     vm.loading = {
       loading: true,
       error: null,
@@ -1093,14 +1098,14 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 
     function getMessagesHtml(pointArray) {
       var hasMsg = false;
-      var html = '<ul style=" padding-left:5px;">';
+      var html = '<ol style=" padding-left:5px;">';
       pointArray.forEach(function (element) {
         if (element.message) {
           hasMsg = true;
           html += '<li>' + element.message + '</li>';
         }
       });
-      html += '</ul>';
+      html += '</ol>';
       if (hasMsg) {
         return $sce.trustAsHtml(html);
       } else {
