@@ -7,9 +7,32 @@ var templateCache = require('gulp-angular-templatecache');
 const babel = require('gulp-babel');
 // var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
+var ngConstant = require('gulp-ng-constant');
 // var sourcemaps = require('gulp-sourcemaps');
 // var plumber = require('gulp-plumber');
 var browserSync = require('browser-sync').create();
+
+// Set NODE_ENV to 'development'
+gulp.task('env:dev', function () {
+  process.env.NODE_ENV = 'development';
+});
+
+gulp.task('constants', function () {
+  process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+    var myConfig = {
+      "test": { "ENV": "test" },
+      "development": { "ENV": "development" },
+      "production": { "ENV": "production" }
+    };
+  var envConfig = myConfig[process.env.NODE_ENV];
+  return ngConstant({
+    name: 'app.config',
+    deps: false,
+    constants: envConfig,
+    stream: true
+  })
+  .pipe(gulp.dest('./app/config'));
+});
 
 gulp.task('angular', function() {
   return gulp.src(['!app/vendor/*','!app/test/**','!app/karma.conf.js','app/**/*.module.js','app/**/*.js'])
@@ -47,5 +70,5 @@ gulp.task('browser-sync-serve', function() {
   });
 });
 
-gulp.task('build', ['angular', 'vendor', 'templates']);
-gulp.task('default', ['build', 'watch', 'browser-sync-serve']);
+gulp.task('build', ['constants','angular', 'vendor', 'templates']);
+gulp.task('default', ['env:dev','build', 'watch', 'browser-sync-serve']);

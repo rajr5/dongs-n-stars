@@ -2,8 +2,18 @@
   'use strict';
 
   angular.module('app.config')
-    .config(function($routeProvider, $locationProvider, $authProvider) {
+    .config(function($logProvider, $compileProvider, $routeProvider, $locationProvider, $authProvider, ENV) {
       $locationProvider.html5Mode(true);
+
+        // turn debugging off/on (no info or warn)
+        if (ENV === 'development' || ENV === 'test') {
+            $logProvider.debugEnabled(true);
+            $compileProvider.debugInfoEnabled(true);
+            console.log('env', ENV);
+        } else {
+            $logProvider.debugEnabled(false);
+            $compileProvider.debugInfoEnabled(false);
+        }
 
       $routeProvider
         .when('/', {

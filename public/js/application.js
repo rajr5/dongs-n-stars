@@ -279,10 +279,20 @@
 (function () {
   'use strict';
 
-  angular.module('app.config').config(["$routeProvider", "$locationProvider", "$authProvider", function ($routeProvider, $locationProvider, $authProvider) {
+  angular.module('app.config').config(["$logProvider", "$compileProvider", "$routeProvider", "$locationProvider", "$authProvider", "ENV", function ($logProvider, $compileProvider, $routeProvider, $locationProvider, $authProvider, ENV) {
     skipIfAuthenticated.$inject = ["$location", "$auth"];
     loginRequired.$inject = ["$location", "$auth"];
     $locationProvider.html5Mode(true);
+
+    // turn debugging off/on (no info or warn)
+    if (ENV === 'development' || ENV === 'test') {
+      $logProvider.debugEnabled(true);
+      $compileProvider.debugInfoEnabled(true);
+      console.log('env', ENV);
+    } else {
+      $logProvider.debugEnabled(false);
+      $compileProvider.debugInfoEnabled(false);
+    }
 
     $routeProvider.when('/', {
       templateUrl: 'layout/home.html',
@@ -352,6 +362,53 @@
     }
   }]);
 })();
+'use strict';
+
+(function () {
+    'use strict';
+
+    angular.module('app.config').factory('Logger', Logger);
+
+    Logger.$inject = ['$log'];
+
+    function Logger($log) {
+        var service = {
+
+            error: error,
+            info: info,
+            success: success,
+            warning: warning,
+            debug: debug,
+            log: $log.log
+        };
+
+        return service;
+        /////////////////////
+
+        function error(message, data) {
+            $log.error('Error: ' + message, data);
+        }
+
+        function info(message, data) {
+            $log.info('Info: ' + message, data);
+        }
+
+        function debug(message, data) {
+            $log.debug('Debug: ' + message, data);
+        }
+
+        function success(message, data) {
+            $log.info('Success: ' + message, data);
+        }
+
+        function warning(message, data) {
+            $log.warn('Warning: ' + message, data);
+        }
+    }
+})();
+"use strict";
+
+angular.module("app.config").constant("ENV", "development");
 'use strict';
 
 (function () {
@@ -1029,8 +1086,8 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
 
   angular.module('app.stats').controller('StatsController', StatsController);
 
-  StatsController.$inject = ['$sce', '$q', 'Stats', 'Toast'];
-  function StatsController($sce, $q, Stats, Toast) {
+  StatsController.$inject = ['$sce', '$q', 'Stats', 'Toast', 'Logger'];
+  function StatsController($sce, $q, Stats, Toast, Logger) {
     var vm = this;
 
     // 7: {
@@ -1082,6 +1139,7 @@ angular.module('app.services').factory('Point', ["$http", function ($http) {
           vm.mostPoints[numDays].isOpen = isOpen;
           addMessages(vm.mostPoints[numDays].dongs, 'dongs');
           addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
+          Logger.debug('vm.mostPoints - ' + numDays, vm.mostPoints);
           resolve();
         }).catch(function (response) {
           Toast.show('error', 'Error', response.data);

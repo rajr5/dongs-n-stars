@@ -18,7 +18,7 @@ function userPointQueryHelper(gtDate, obj, dateField) {
     UserPoint.find({})
     .where(whereClause)
     .populate({path: 'user'})
-    .select('id updatedAt createdAt user ' + obj)
+    .select('id updatedAt createdAt user added ' + obj)
     .exec((err, userPoints) => {
       if (err) {
         return reject(err);
@@ -27,6 +27,76 @@ function userPointQueryHelper(gtDate, obj, dateField) {
     });
 
   });
+}
+
+module.exports.getDongsWithinRange = function(numDays) {
+    return new Promise(function(resolve, reject) {
+      var filterDate = getGtDate(numDays);
+      userPointQueryHelper(filterDate, 'dongs', 'added')
+      .then(function(data) {
+        var output = filterGtRecordsHelper(data, 'dongs', 'added', filterDate);
+        console.log(output);
+        resolve(output);
+      })
+      .catch(function(err){
+        reject(err);
+      });
+  });
+};
+
+module.exports.getRockstarsWithinRange = function(numDays) {
+    return new Promise(function(resolve, reject) {
+      var filterDate = getGtDate(numDays);
+      userPointQueryHelper(filterDate, 'rockstars', 'added')
+      .then(function(data) {
+        var output = filterGtRecordsHelper(data, 'rockstars', 'added', filterDate);
+        resolve(output);
+      })
+      .catch(function(err){
+        reject(err);
+      });
+  });
+};
+
+
+/////////////////// UTIL FUNCTIONS /////////////////////////////
+function filterGtRecordsHelper(arr, outerProp, prop, filterDate) {
+  if (!Array.isArray(arr) || arr.length === 0 || !filterDate) {
+    return arr;
+  } else {
+    console.log(arr);
+    arr.map((elem) => {
+      elem[outerProp] = filterGtRecords(elem[outerProp], prop, filterDate);
+    });
+  }
+  return arr;
+}
+
+
+function filterGtRecords(arr, prop, filterDate) {
+  if (!Array.isArray(arr) || arr.length === 0 || !filterDate) {
+    return arr;
+  } else {
+    return arr.filter((obj) => {
+      if (removeTime(obj[prop]) > removeTime(filterDate)) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+}
+
+function removeTime(d) {
+  try {
+    var newDate = new Date(d);
+    newDate.setHours(0);
+    newDate.setMinutes(0);
+    newDate.setSeconds(0);
+    return newDate;
+  } catch (e) {
+    return d;
+  }
 }
 
 function getGtDate(numDays) {
@@ -42,27 +112,3 @@ function getGtDate(numDays) {
   }
   return gtDate;
 }
-
-module.exports.getDongsWithinRange = function(numDays) {
-    return new Promise(function(resolve, reject) {
-      userPointQueryHelper(getGtDate(numDays), 'dongs', 'added')
-      .then(function(data) {
-        resolve(data);
-      })
-      .catch(function(err){
-        reject(err);
-      });
-  });
-};
-
-module.exports.getRockstarsWithinRange = function(numDays) {
-    return new Promise(function(resolve, reject) {
-      userPointQueryHelper(getGtDate(numDays), 'rockstars', 'added')
-      .then(function(data) {
-        resolve(data);
-      })
-      .catch(function(err){
-        reject(err);
-      });
-  });
-};
