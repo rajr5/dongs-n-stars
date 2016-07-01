@@ -5,8 +5,8 @@
     .module('app.stats')
     .controller('StatsController', StatsController);
 
-  StatsController.$inject = ['$sce','$q','Stats', 'Toast'];
-  function StatsController($sce, $q, Stats, Toast) {
+  StatsController.$inject = ['$sce','$q','Stats', 'Toast', 'Logger'];
+  function StatsController($sce, $q, Stats, Toast, Logger) {
     var vm = this;
 
     // 7: {
@@ -59,6 +59,7 @@
           vm.mostPoints[numDays].isOpen = isOpen;
           addMessages(vm.mostPoints[numDays].dongs, 'dongs');
           addMessages(vm.mostPoints[numDays].rockstars, 'rockstars');
+          Logger.debug('vm.mostPoints - '+numDays, vm.mostPoints);
           resolve();
         })
         .catch(function(response){
